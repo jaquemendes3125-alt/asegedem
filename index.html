@@ -3,257 +3,409 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Motor HTN Interativo Funcional</title>
+  <title>COZINHA MULTIPERFIL — Gestão de Cardápios por Perfis</title>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0d1117;
-      --card-bg: #161b22;
-      --border: #30363d;
-      --accent: #58a6ff;
-      --green: #238636;
-      --green-hover: #2ea043;
-      --red: #da3633;
-      --text: #c9d1d9;
+      --bg: #f8fafc; --card: #ffffff; --texto: #0f172a; --texto-claro: #64748b;
+      --saude: #ef4444; --fit: #10b981; --caseiro: #f59e0b; --solteiro: #8b5cf6; --gourmet: #f97316;
+      --borda: #e2e8f0; --sombra: 0 4px 12px rgba(0,0,0,0.06);
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: var(--texto); padding: 16px; max-width: 700px; margin: 0 auto; }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; }
-    body { background-color: var(--bg); color: var(--text); padding: 20px; max-width: 900px; margin: 0 auto; }
-    h1 { color: var(--accent); margin-bottom: 20px; font-size: 1.4rem; text-align: center; }
+    header { text-align: center; padding: 20px; background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border-radius: 20px; margin-bottom: 24px; }
+    h1 { font-size: 1.4rem; font-weight: 800; }
+    .sub { font-size: 0.85rem; opacity: 0.8; margin-top: 4px; }
 
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    .painel-voz { background: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: var(--sombra); }
+    .btn-microfone { width: 80px; height: 80px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 2rem; cursor: pointer; transition: all 0.2s; }
+    .btn-microfone.ouvindo { background: #ef4444; animation: pulso 1s infinite; }
+    @keyframes pulso { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
+    .status-voz { margin-top: 10px; font-size: 0.9rem; color: #475569; }
+    .resposta-voz { margin-top: 8px; padding: 10px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; min-height: 40px; }
 
-    .card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
-    .card h3 { color: var(--accent); font-size: 0.95rem; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+    .secao { margin-bottom: 24px; }
+    .titulo-secao { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 
-    .state-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
-    .state-toggle input { cursor: pointer; transform: scale(1.2); }
+    .perfil-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+    .btn-perfil { padding: 10px 4px; border: 3px solid transparent; border-radius: 12px; font-weight: 700; font-size: 0.75rem; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .btn-perfil.saude { background: #fef2f2; color: #b91c1c; border-color: var(--saude); }
+    .btn-perfil.fit { background: #f0fdf4; color: #15803d; border-color: var(--fit); }
+    .btn-perfil.caseiro { background: #fffbeb; color: #b45309; border-color: var(--caseiro); }
+    .btn-perfil.solteiro { background: #faf5ff; color: #6b21a8; border-color: var(--solteiro); }
+    .btn-perfil.gourmet { background: #fff7ed; color: #c2410c; border-color: var(--gourmet); }
+    .btn-perfil.selecionado { transform: scale(1.05); box-shadow: 0 0 0 3px rgba(0,0,0,0.15); }
 
-    pre { background: #010409; padding: 10px; border-radius: 6px; overflow-x: auto; color: #7ee787; font-size: 0.85rem; }
+    .form-card { background: white; padding: 16px; border-radius: 16px; box-shadow: var(--sombra); margin-bottom: 16px; }
+    input, textarea { width: 100%; padding: 12px; border: 2px solid var(--borda); border-radius: 10px; font-size: 1rem; margin-bottom: 10px; }
+    input:focus, textarea:focus { outline: none; border-color: #3b82f6; }
+    .btn-principal { width: 100%; padding: 12px; background: #1e293b; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 6px; }
+    .btn-whatsapp { background: #25d366; margin-top: 10px; }
 
-    .btn-container { text-align: center; margin: 20px 0; }
-    button { background: var(--green); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background 0.2s; }
-    button:hover { background: var(--green-hover); }
+    .cliente-card { background: white; border-radius: 14px; padding: 14px; margin-bottom: 10px; border-left: 6px solid #ccc; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    .cliente-nome { font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
+    .cliente-perfil { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; color: white; margin-bottom: 6px; }
+    .cliente-card.saude { border-left-color: var(--saude); } .cliente-perfil.saude { background: var(--saude); }
+    .cliente-card.fit { border-left-color: var(--fit); } .cliente-perfil.fit { background: var(--fit); }
+    .cliente-card.caseiro { border-left-color: var(--caseiro); } .cliente-perfil.caseiro { background: var(--caseiro); }
+    .cliente-card.solteiro { border-left-color: var(--solteiro); } .cliente-perfil.solteiro { background: var(--solteiro); }
+    .cliente-card.gourmet { border-left-color: var(--gourmet); } .cliente-perfil.gourmet { background: var(--gourmet); }
+    .cliente-restricao { font-size: 0.85rem; color: #b91c1c; background: #fef2f2; padding: 4px 8px; border-radius: 6px; display: inline-block; margin: 4px 0; }
+    .cliente-card.concluido { opacity: 0.5; }
 
-    .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; font-size: 0.85rem; }
-    .status-success { background: rgba(35, 134, 54, 0.2); color: #3fb950; border: 1px solid #238636; }
-    .status-fail { background: rgba(218, 54, 51, 0.2); color: #f85149; border: 1px solid #da3633; }
+    .lista-compra { background: #eff6ff; padding: 16px; border-radius: 14px; border: 2px dashed #93c5fd; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; }
+    .botoes-lado { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-acao { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    .btn-concluir { background: #dcfce7; color: #166534; }
+    .btn-remover { background: #fee2e2; color: #b91c1c; }
 
-    ol { padding-left: 20px; }
-    li { margin-bottom: 6px; font-size: 0.9rem; }
+    .tela-senha { position: fixed; inset: 0; background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .caixa-senha { background: white; padding: 30px; border-radius: 20px; max-width: 320px; width: 90%; text-align: center; }
+    .caixa-senha h2 { margin-bottom: 16px; color: #1e293b; }
+    .caixa-senha input { text-align: center; }
+    .caixa-senha button { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+    .erro-senha { color: #dc2626; margin-top: 10px; display: none; }
+    .conteudo { display: none; }
   </style>
 </head>
 <body>
 
-  <h1>🧠 Motor de Planejamento HTN (Hierarchical Task Network)</h1>
-
-  <div class="grid">
-    <!-- Controles do Estado Inicial -->
-    <div class="card">
-      <h3>1. Estado Inicial do Mundo (Simulador)</h3>
-      <div id="stateControls">
-        <!-- Gerado via JS -->
-      </div>
-    </div>
-
-    <!-- Tarefa de Alto Nível -->
-    <div class="card">
-      <h3>2. Rede de Tarefas HTN</h3>
-      <p style="font-size: 0.85rem; margin-bottom: 10px; color: #8b949e;">Objetivo de Alto Nível:</p>
-      <pre>["preparar_pedido_joao"]</pre>
-      <p style="font-size: 0.8rem; margin-top: 10px; color: #8b949e;">
-        Decomposição: Grelhar Peixe ➔ Liberar Forno ➔ Purê Zero Lactose ➔ Embalar ➔ Etiquetar.
-      </p>
+  <!-- 🔒 TELA DE SENHA -->
+  <div class="tela-senha" id="telaSenha">
+    <div class="caixa-senha">
+      <h2>🔐 Acesso Restrito</h2>
+      <input type="password" id="campoSenha" placeholder="Digite a senha" onkeypress="if(event.key==='Enter')verificarSenha()">
+      <button onclick="verificarSenha()">Entrar</button>
+      <p class="erro-senha" id="erroSenha">Senha incorreta!</p>
     </div>
   </div>
 
-  <div class="btn-container">
-    <button onclick="executarPlanejadorHTN()">⚙️ Executar Planejador HTN</button>
+  <div class="conteudo" id="conteudoApp">
+
+  <header>
+    <h1>🍳 COZINHA MULTIPERFIL</h1>
+    <p class="sub">Gestão de Cardápios e Produção por Perfis — Mãos-Livres</p>
+  </header>
+
+  <!-- 🎙️ PAINEL DE COMANDO POR VOZ -->
+  <div class="painel-voz">
+    <button class="btn-microfone" id="btnVoz" onclick="alternarVoz()">🎙️</button>
+    <p class="status-voz" id="statusVoz">Toque para falar: "Cadastra 5 marmitas do perfil saúde"</p>
+    <div class="resposta-voz" id="respostaVoz">Ouvirei você e orientarei na bancada!</div>
   </div>
 
-  <!-- Resultado do Plano -->
-  <div class="card">
-    <h3>3. Sequência Plana de Ações Gerada</h3>
-    <div id="statusBadge"></div>
-    <div id="planOutput">Clique no botão acima para rodar o motor HTN.</div>
+  <!-- 📋 SELEÇÃO DE PERFIL -->
+  <div class="secao">
+    <div class="titulo-secao">👤 Selecionar Perfil do Cliente</div>
+    <div class="perfil-grid">
+      <button class="btn-perfil saude" data-perfil="saude" onclick="selecionarPerfil('saude','Saúde / Pós-op')">🔴 Saúde</button>
+      <button class="btn-perfil fit" data-perfil="fit" onclick="selecionarPerfil('fit','Performance')">🟢 Fit</button>
+      <button class="btn-perfil caseiro" data-perfil="caseiro" onclick="selecionarPerfil('caseiro','Caseiro')">🟡 Casa</button>
+      <button class="btn-perfil solteiro" data-perfil="solteiro" onclick="selecionarPerfil('solteiro','Solteiro')">🟣 Rápido</button>
+      <button class="btn-perfil gourmet" data-perfil="gourmet" onclick="selecionarPerfil('gourmet','Gourmet')">🟠 Sabor</button>
+    </div>
   </div>
 
-<script>
-// ============================================================================
-// 1. ENGINE HTN
-// ============================================================================
-class HTNPlanner {
-  constructor() {
-    this.operators = {};
-    this.methods = {};
-  }
+  <!-- ✍️ CADASTRAR CLIENTE -->
+  <div class="secao">
+    <div class="titulo-secao">➕ Cadastrar Cliente</div>
+    <div class="form-card">
+      <input type="text" id="nomeCliente" placeholder="Nome do Cliente" />
+      <input type="text" id="qtdMarmitas" placeholder="Quantidade de Marmitas" />
+      <textarea id="restricaoCliente" placeholder="Restrições ou observações especiais..." rows="2"></textarea>
+      <button class="btn-principal" onclick="cadastrarCliente()">✅ Cadastrar Pedido</button>
+    </div>
+  </div>
 
-  addOperator(name, preconditions, effects) {
-    this.operators[name] = { preconditions, effects };
-  }
+  <!-- 📲 LISTA DE COMPRAS UNIFICADA -->
+  <div class="secao">
+    <div class="titulo-secao">
+      🛒 Lista de Compras Consolidada
+      <button class="btn-acao" style="background:#dbeafe; color:#1d4ed8; padding:4px 8px; font-size:0.8rem;" onclick="copiarLista()">📋 Copiar</button>
+    </div>
+    <div class="lista-compra" id="listaCompras">— Cadastre clientes para gerar a lista de insumos —</div>
+    <button class="btn-principal btn-whatsapp" onclick="enviarListaWhatsApp()">📲 Enviar Lista ao Fornecedor</button>
+  </div>
 
-  addMethod(taskName, condition, subtasks) {
-    if (!this.methods[taskName]) {
-      this.methods[taskName] = [];
-    }
-    this.methods[taskName].push({ condition, subtasks });
-  }
+  <!-- 📦 PEDIDOS CADASTRADOS -->
+  <div class="secao">
+    <div class="titulo-secao">📦 Pedidos do Dia <span id="contador">0</span></div>
+    <div id="listaClientes"></div>
+  </div>
 
-  checkConditions(state, conditions) {
-    for (let key in conditions) {
-      if (state[key] !== conditions[key]) return false;
-    }
-    return true;
-  }
+  </div>
 
-  applyEffects(state, effects) {
-    let newState = { ...state };
-    for (let key in effects) {
-      newState[key] = effects[key];
-    }
-    return newState;
-  }
-
-  findPlan(state, taskList, plan = []) {
-    if (taskList.length === 0) {
-      return plan;
-    }
-
-    let currentTask = taskList[0];
-    let remainingTasks = taskList.slice(1);
-
-    // Operador Primitivo
-    if (this.operators[currentTask]) {
-      let op = this.operators[currentTask];
-      if (this.checkConditions(state, op.preconditions)) {
-        let nextState = this.applyEffects(state, op.effects);
-        let result = this.findPlan(nextState, remainingTasks, [...plan, currentTask]);
-        if (result !== null) return result;
-      }
-      return null; // Falha nas pré-condições (Backtrack)
-    }
-
-    // Tarefa Composta (Método)
-    if (this.methods[currentTask]) {
-      for (let method of this.methods[currentTask]) {
-        if (method.condition(state)) {
-          let newTaskList = [...method.subtasks, ...remainingTasks];
-          let result = this.findPlan(state, newTaskList, plan);
-          if (result !== null) return result;
-        }
+  <script>
+    // 🔒 SENHA DE ACESSO — ALTERE AQUI
+    const SENHA_CORRETA = "siesta";
+    function verificarSenha() {
+      const d = document.getElementById('campoSenha').value;
+      if (d === SENHA_CORRETA) {
+        document.getElementById('telaSenha').style.display = 'none';
+        document.getElementById('conteudoApp').style.display = 'block';
+      } else {
+        document.getElementById('erroSenha').style.display = 'block';
+        document.getElementById('campoSenha').value = '';
       }
     }
 
-    return null;
-  }
-}
+    // 🗄️ CONEXÃO COM SUPABASE
+    const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ============================================================================
-// 2. DOMÍNIO E REGRAS
-// ============================================================================
-const planner = new HTNPlanner();
+    // 📦 BANCO DE CARDÁPIOS — 25 SOLUÇÕES POR PERFIL
+    const cardapios = {
+      saude: [
+        "Peixe branco grelhado + Purê de mandioquinha sem leite + Legumes no vapor",
+        "Frango cozido no vapor com cenoura + Arroz de couve-flor + Mandioca cozida",
+        "Carne moída magra refogada com chuchu e abobrinha + Purê de batata leve",
+        "Sopa creme de abóbora com frango desfiado e gengibre",
+        "Omelete de claras com espinafre e ricota leve + Arroz bem cozido"
+      ],
+      fit: [
+        "Peito de frango grelhado 150g + Batata-doce 100g + Vagem refogada",
+        "Patinho moído grelhado 150g + Arroz integral 100g + Feijão preto + Brócolis",
+        "Filé de tilápia grelhada 150g + Purê de mandioca 100g + Mix de folhas",
+        "Tiras de alcatra magra 150g + Macarrão integral ao molho de tomate + Legumes",
+        "Hambúrguer caseiro de frango 150g + Arroz com lentilha + Couve refogada"
+      ],
+      caseiro: [
+        "Bife de alcatra acebolado + Arroz branco + Feijão carioca + Farofa de cenoura",
+        "Sobrecoxa assada com ervas e batatas + Arroz integral + Salada de beterraba",
+        "Lombo suíno assado com molho de abacaxi + Arroz com açafrão + Couve refogada",
+        "Peixe ensopado com pimentões + Arroz branco + Pirão leve",
+        "Polpeta de carne ao molho de tomate + Macarrão + Salada verde"
+      ],
+      solteiro: [
+        "Escondidinho de frango desfiado com purê de batata-doce e milho",
+        "Risoto de funghi com tiras de carne grelhada",
+        "Galinhada funcional com legumes em cubos e cheiro-verde",
+        "Chilli leve de carne moída com feijão vermelho e arroz soltinho",
+        "Penne ao molho pesto com tiras de frango grelhado e tomate-cereja"
+      ],
+      gourmet: [
+        "Lasanha à bolonhesa com camadas de mussarela e molho de tomate caseiro",
+        "Nhoque de batata ao molho quatro queijos com tiras de filé mignon",
+        "Frango à parmegiana assado + Arroz branco + Batata rústica",
+        "Strogonoff de carne com creme de leite + Arroz branco + Batata palha",
+        "Escondidinho de costela desfiada com purê de mandioca gratinado com queijo coalho"
+      ]
+    };
 
-// Estado Dinâmico
-let estadoMundo = {
-  forno_ocupado: false,
-  peixe_grelhado: false,
-  pure_sem_leite: false,
-  marmita_joao_embalada: false,
-  marmita_joao_etiquetada: false
-};
+    const nomesPerfis = {
+      saude: "Saúde / Pós-operatório",
+      fit: "Performance / Fitness",
+      caseiro: "Saudável Equilibrado",
+      solteiro: "Praticidade Solteiro",
+      gourmet: "Comfort Food / Sabor"
+    };
 
-// Operadores
-planner.addOperator('grelhar_peixe', 
-  { forno_ocupado: false, peixe_grelhado: false }, 
-  { peixe_grelhado: true, forno_ocupado: true }
-);
+    let perfisSelecionado = null;
+    let clientes = [];
+    let reconhecimento = null;
 
-planner.addOperator('liberar_forno', 
-  { forno_ocupado: true }, 
-  { forno_ocupado: false }
-);
+    // 🎨 SELECIONAR PERFIL
+    function selecionarPerfil(tipo, nome) {
+      document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
+      document.querySelector(`.btn-perfil.${tipo}`).classList.add('selecionado');
+      perfisSelecionado = tipo;
+      falar(`Perfil ${nome} selecionado. Digite o nome e a quantidade de marmitas.`);
+    }
 
-planner.addOperator('preparar_pure_zero_lactose', 
-  { pure_sem_leite: false }, 
-  { pure_sem_leite: true }
-);
+    // ✅ CADASTRAR CLIENTE
+    function cadastrarCliente() {
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const qtd = parseInt(document.getElementById('qtdMarmitas').value) || 1;
+      const restr = document.getElementById('restricaoCliente').value.trim();
 
-planner.addOperator('embalar_marmita_joao', 
-  { peixe_grelhado: true, pure_sem_leite: true, marmita_joao_embalada: false }, 
-  { marmita_joao_embalada: true }
-);
+      if (!nome || !perfisSelecionado) { alert('Informe o nome e selecione um perfil!'); return; }
 
-planner.addOperator('colocar_etiqueta_vermelha', 
-  { marmita_joao_embalada: true, marmita_joao_etiquetada: false }, 
-  { marmita_joao_etiquetada: true }
-);
+      const cardapio = cardapios[perfisSelecionado][Math.floor(Math.random() * 5)];
+      const novo = {
+        id: Date.now(),
+        nome,
+        perfil: perfisSelecionado,
+        perfilNome: nomesPerfis[perfisSelecionado],
+        qtd,
+        restricao: restr || "Sem restrições especiais",
+        cardapio,
+        concluido: false
+      };
 
-// Métodos de Decomposição
-planner.addMethod('preparar_pedido_joao',
-  (state) => true,
-  [
-    'grelhar_peixe',
-    'liberar_forno',
-    'preparar_pure_zero_lactose',
-    'embalar_marmita_joao',
-    'colocar_etiqueta_vermelha'
-  ]
-);
+      clientes.push(novo);
+      salvarNoSupabase(novo);
+      limparFormulario();
+      renderizarLista();
+      gerarListaCompras();
+      falar(`Cadastrado ${qtd} marmita${qtd>1?'s':''} de ${nome}, perfil ${nomesPerfis[perfisSelecionado].split('/')[0]}.`);
+    }
 
-// ============================================================================
-// 3. INTERFACE E INTERATIVIDADE
-// ============================================================================
-function renderControls() {
-  const container = document.getElementById('stateControls');
-  container.innerHTML = '';
+    // 💾 SALVAR NO SUPABASE
+    async function salvarNoSupabase(cliente) {
+      try {
+        const { error } = await supabase.from('pedidos').insert([cliente]);
+        if (error) console.log('Tabela ainda não criada, salvo localmente:', error.message);
+      } catch(e) { console.log('Supabase offline — salvo localmente'); }
+    }
 
-  for (let key in estadoMundo) {
-    const div = document.createElement('div');
-    div.className = 'state-toggle';
-    div.innerHTML = `
-      <label for="${key}">${key}:</label>
-      <input type="checkbox" id="${key}" ${estadoMundo[key] ? 'checked' : ''} onchange="updateState('${key}', this.checked)">
-    `;
-    container.appendChild(div);
-  }
-}
+    // 📄 RENDERIZAR LISTA
+    function renderizarLista() {
+      const el = document.getElementById('listaClientes');
+      el.innerHTML = '';
+      let concluidas = 0;
 
-function updateState(key, value) {
-  estadoMundo[key] = value;
-}
+      clientes.forEach(c => {
+        if (c.concluido) concluidas++;
+        const card = document.createElement('div');
+        card.className = `cliente-card ${c.perfil} ${c.concluido?'concluido':''}`;
+        card.innerHTML = `
+          <div class="cliente-nome">${c.nome}</div>
+          <span class="cliente-perfil ${c.perfil}">${c.perfilNome}</span>
+          <div style="font-size:0.9rem; margin:4px 0;">🍽️ ${c.qtd} marmita${c.qtd>1?'s':''}</div>
+          <div style="font-size:0.9rem;">${c.cardapio}</div>
+          <div class="cliente-restricao">⚠️ ${c.restricao}</div>
+          <div class="botoes-lado">
+            <button class="btn-acao btn-concluir" onclick="alternarConcluido(${c.id})">${c.concluido?'↩️ Refazer':'✅ Concluir'}</button>
+            <button class="btn-acao btn-remover" onclick="removerCliente(${c.id})">🗑️ Excluir</button>
+          </div>
+        `;
+        el.appendChild(card);
+      });
 
-function executarPlanejadorHTN() {
-  // Executa uma cópia para não alterar diretamente o estado do DOM durante a simulação
-  let estadoAtual = { ...estadoMundo };
-  let plano = planner.findPlan(estadoAtual, ['preparar_pedido_joao']);
+      document.getElementById('contador').innerText = `(${clientes.length} pedido${clientes.length!==1?'s':''} — ${concluidas} concluídas)`;
+    }
 
-  const statusBadge = document.getElementById('statusBadge');
-  const outputEl = document.getElementById('planOutput');
+    function alternarConcluido(id) {
+      const c = clientes.find(x => x.id === id);
+      if (c) {
+        c.concluido = !c.concluido;
+        renderizarLista();
+        gerarListaCompras();
+        falar(`${c.concluido?'Marmitas de '+c.nome+' concluídas':'Pedido de '+c.nome+' reaberto'}`);
+      }
+    }
 
-  if (plano) {
-    statusBadge.className = 'status-badge status-success';
-    statusBadge.innerText = '✓ PLANO GERADO COM SUCESSO';
-    
-    let htmlList = '<ol>';
-    plano.forEach(acao => {
-      htmlList += `<li><code>${acao}</code></li>`;
-    });
-    htmlList += '</ol>';
-    outputEl.innerHTML = htmlList;
-  } else {
-    statusBadge.className = 'status-badge status-fail';
-    statusBadge.innerText = '✗ FALHA DE PLANEJAMENTO (CONFLITO DE PRÉ-CONDIÇÕES)';
-    outputEl.innerHTML = `
-      <p style="color: #f85149; font-size: 0.85rem;">
-        O motor HTN não conseguiu encontrar uma sequência válida.<br/>
-        <strong>Motivo comum:</strong> Se o <code>forno_ocupado</code> já estiver marcado como <i>true</i>, o operador <code>grelhar_peixe</code> falha na pré-condição.
-      </p>
-    `;
-  }
-}
+    function removerCliente(id) {
+      clientes = clientes.filter(x => x.id !== id);
+      renderizarLista();
+      gerarListaCompras();
+    }
 
-// Inicializar
-renderControls();
-</script>
+    // 🛒 LISTA DE COMPRAS INTELIGENTE
+    function gerarListaCompras() {
+      const ativos = clientes.filter(c => !c.concluido);
+      if (!ativos.length) {
+        document.getElementById('listaCompras').textContent = '— Cadastre clientes para gerar a lista de insumos —';
+        return;
+      }
+
+      let texto = "📦 LISTA DE COMPRAS — COZINHA MULTIPERFIL\n";
+      texto += "═══════════════════════════════════\n\n";
+      ativos.forEach(c => {
+        texto += `🔹 ${c.nome} — ${c.qtd}x ${c.perfilNome.split('/')[0]}\n`;
+        texto += `   ${c.cardapio}\n`;
+        if (c.restricao && c.restricao !== "Sem restrições especiais") texto += `   ⚠️ ${c.restricao}\n`;
+        texto += "\n";
+      });
+      texto += "═══════════════════════════════════\n";
+      texto += "✅ Total: " + ativos.reduce((s,c)=>s+c.qtd,0) + " marmitas para preparar";
+
+      document.getElementById('listaCompras').textContent = texto;
+    }
+
+    function copiarLista() {
+      navigator.clipboard.writeText(document.getElementById('listaCompras').textContent);
+      alert('Lista copiada!');
+    }
+
+    function enviarListaWhatsApp() {
+      const texto = encodeURIComponent(document.getElementById('listaCompras').textContent);
+      window.open(`https://wa.me/?text=${texto}`, '_blank');
+    }
+
+    // 🎙️ RECONHECIMENTO DE VOZ
+    function falar(texto) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(texto);
+        u.lang = 'pt-BR'; u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    let ouvindo = false;
+    function alternarVoz() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Use Chrome para comandos de voz!'); return;
+      }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!reconhecimento) {
+        reconhecimento = new SR();
+        reconhecimento.lang = 'pt-BR';
+        reconhecimento.continuous = false;
+        reconhecimento.onstart = () => {
+          ouvindo = true;
+          document.getElementById('btnVoz').classList.add('ouvindo');
+          document.getElementById('statusVoz').textContent = '🔊 Ouvindo...';
+        };
+        reconhecimento.onresult = e => {
+          const cmd = e.results[0][0].transcript.toLowerCase();
+          document.getElementById('respostaVoz').textContent = 'Você disse: "' + cmd + '"';
+          processarComando(cmd);
+        };
+        reconhecimento.onend = pararVoz;
+        reconhecimento.onerror = pararVoz;
+      }
+      ouvindo ? reconhecimento.stop() : reconhecimento.start();
+    }
+
+    function pararVoz() {
+      ouvindo = false;
+      document.getElementById('btnVoz').classList.remove('ouvindo');
+      document.getElementById('statusVoz').textContent = 'Toque para falar...';
+    }
+
+    function processarComando(cmd) {
+      if (cmd.includes('saúde') || cmd.includes('pós-operatório') || cmd.includes('sem leite')) {
+        selecionarPerfil('saude', 'Saúde');
+      } else if (cmd.includes('fitness') || cmd.includes('academia') || cmd.includes('frango') || cmd.includes('batata')) {
+        selecionarPerfil('fit', 'Performance');
+      } else if (cmd.includes('caseiro') || cmd.includes('tradicional') || cmd.includes('feijão')) {
+        selecionarPerfil('caseiro', 'Caseiro');
+      } else if (cmd.includes('solteiro') || cmd.includes('rápido') || cmd.includes('esquentar')) {
+        selecionarPerfil('solteiro', 'Praticidade');
+      } else if (cmd.includes('gourmet') || cmd.includes('massa') || cmd.includes('queijo') || cmd.includes('sabor')) {
+        selecionarPerfil('gourmet', 'Gourmet');
+      } else if (cmd.includes('cadastra') || cmd.includes('cadastrar')) {
+        cadastrarCliente();
+      } else if (cmd.includes('lista') && cmd.includes('comprar')) {
+        gerarListaCompras();
+        falar('Lista de compras gerada!');
+      } else if (cmd.includes('próxima') || cmd.includes('qual é a próxima')) {
+        const prox = clientes.find(c => !c.concluido);
+        prox ? falar(`Próxima é ${prox.nome}: ${prox.cardapio}. Lembrete: ${prox.restricao}`) : falar('Todas concluídas!');
+      } else {
+        falar('Entendi: ' + cmd + '. Use: perfil saúde, fit, caseiro, solteiro ou gourmet. Depois digite nome e cadastre.');
+      }
+    }
+
+    function limparFormulario() {
+      document.getElementById('nomeCliente').value = '';
+      document.getElementById('qtdMarmitas').value = '';
+      document.getElementById('restricaoCliente').value = '';
+      document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
+      perfisSelecionado = null;
+    }
+
+    // Carregar dados salvos localmente
+    const salvos = localStorage.getItem('cozinhaPedidos');
+    if (salvos) { clientes = JSON.parse(salvos); renderizarLista(); gerarListaCompras(); }
+    setInterval(() => localStorage.setItem('cozinhaPedidos', JSON.stringify(clientes)), 5000);
+  </script>
 </body>
 </html>
