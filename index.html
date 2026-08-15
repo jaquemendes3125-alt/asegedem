@@ -3,16 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>COZINHA MULTIPERFIL — Gestão de Cardápios por Perfis</title>
-  <!-- Supabase JS Client -->
+  <title>COZINHA MULTIPERFIL — Gestão de Cardápios</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Google Fonts: Inter -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f8fafc; --card: #ffffff; --texto: #0f172a; --texto-claro: #64748b;
+      --bg: #f8fafc; --card: #ffffff; --texto: #0f172a; --borda: #e2e8f0;
       --saude: #ef4444; --fit: #10b981; --caseiro: #f59e0b; --solteiro: #8b5cf6; --gourmet: #f97316;
-      --borda: #e2e8f0; --sombra: 0 4px 12px rgba(0,0,0,0.06);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { background: var(--bg); color: var(--texto); padding: 16px; max-width: 700px; margin: 0 auto; }
@@ -21,18 +18,18 @@
     h1 { font-size: 1.4rem; font-weight: 800; }
     .sub { font-size: 0.85rem; opacity: 0.8; margin-top: 4px; }
 
-    .painel-voz { background: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: var(--sombra); }
-    .btn-microfone { width: 80px; height: 80px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 2rem; cursor: pointer; transition: all 0.2s; }
+    .painel-voz { background: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .btn-microfone { width: 80px; height: 80px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 2rem; cursor: pointer; }
     .btn-microfone.ouvindo { background: #ef4444; animation: pulso 1s infinite; }
     @keyframes pulso { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
     .status-voz { margin-top: 10px; font-size: 0.9rem; color: #475569; }
     .resposta-voz { margin-top: 8px; padding: 10px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; min-height: 40px; }
 
     .secao { margin-bottom: 24px; }
-    .titulo-secao { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .titulo-secao { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; }
 
     .perfil-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
-    .btn-perfil { padding: 10px 4px; border: 3px solid transparent; border-radius: 12px; font-weight: 700; font-size: 0.75rem; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .btn-perfil { padding: 10px 4px; border: 3px solid transparent; border-radius: 12px; font-weight: 700; font-size: 0.75rem; cursor: pointer; }
     .btn-perfil.saude { background: #fef2f2; color: #b91c1c; border-color: var(--saude); }
     .btn-perfil.fit { background: #f0fdf4; color: #15803d; border-color: var(--fit); }
     .btn-perfil.caseiro { background: #fffbeb; color: #b45309; border-color: var(--caseiro); }
@@ -40,7 +37,7 @@
     .btn-perfil.gourmet { background: #fff7ed; color: #c2410c; border-color: var(--gourmet); }
     .btn-perfil.selecionado { transform: scale(1.05); box-shadow: 0 0 0 3px rgba(0,0,0,0.15); }
 
-    .form-card { background: white; padding: 16px; border-radius: 16px; box-shadow: var(--sombra); margin-bottom: 16px; }
+    .form-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 16px; }
     input, textarea { width: 100%; padding: 12px; border: 2px solid var(--borda); border-radius: 10px; font-size: 1rem; margin-bottom: 10px; }
     input:focus, textarea:focus { outline: none; border-color: #3b82f6; }
     .btn-principal { width: 100%; padding: 12px; background: #1e293b; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 6px; }
@@ -62,29 +59,11 @@
     .btn-acao { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
     .btn-concluir { background: #dcfce7; color: #166534; }
     .btn-remover { background: #fee2e2; color: #b91c1c; }
-
-    .tela-senha { position: fixed; inset: 0; background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-    .caixa-senha { background: white; padding: 30px; border-radius: 20px; max-width: 320px; width: 90%; text-align: center; }
-    .caixa-senha h2 { margin-bottom: 16px; color: #1e293b; }
-    .caixa-senha input { text-align: center; }
-    .caixa-senha button { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; }
-    .erro-senha { color: #dc2626; margin-top: 10px; display: none; }
-    .conteudo { display: none; }
   </style>
 </head>
 <body>
 
-  <!-- 🔒 TELA DE SENHA -->
-  <div class="tela-senha" id="telaSenha">
-    <div class="caixa-senha">
-      <h2>🔐 Acesso Restrito</h2>
-      <input type="password" id="campoSenha" placeholder="Digite a senha" onkeypress="if(event.key==='Enter')verificarSenha()">
-      <button onclick="verificarSenha()">Entrar</button>
-      <p class="erro-senha" id="erroSenha">Senha incorreta!</p>
-    </div>
-  </div>
-
-  <div class="conteudo" id="conteudoApp">
+  <!-- ✅ TELA ABERTA DIRETO — SEM SENHA -->
 
   <header>
     <h1>🍳 COZINHA MULTIPERFIL</h1>
@@ -125,7 +104,7 @@
   <div class="secao">
     <div class="titulo-secao">
       🛒 Lista de Compras Consolidada
-      <button class="btn-acao" style="background:#dbeafe; color:#1d4ed8; padding:4px 8px; font-size:0.8rem;" onclick="copiarLista()">📋 Copiar</button>
+      <button class="btn-acao" style="background:#dbeafe; color:#1d4ed8; padding:4px 8px; font-size:0.8rem; border:none; border-radius:6px;" onclick="copiarLista()">📋 Copiar</button>
     </div>
     <div class="lista-compra" id="listaCompras">— Cadastre clientes para gerar a lista de insumos —</div>
     <button class="btn-principal btn-whatsapp" onclick="enviarListaWhatsApp()">📲 Enviar Lista ao Fornecedor</button>
@@ -137,22 +116,7 @@
     <div id="listaClientes"></div>
   </div>
 
-  </div>
-
   <script>
-    // 🔒 SENHA DE ACESSO — ALTERE AQUI
-    const SENHA_CORRETA = "siesta";
-    function verificarSenha() {
-      const d = document.getElementById('campoSenha').value;
-      if (d === SENHA_CORRETA) {
-        document.getElementById('telaSenha').style.display = 'none';
-        document.getElementById('conteudoApp').style.display = 'block';
-      } else {
-        document.getElementById('erroSenha').style.display = 'block';
-        document.getElementById('campoSenha').value = '';
-      }
-    }
-
     // 🗄️ CONEXÃO COM SUPABASE
     const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
     const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
@@ -282,18 +246,10 @@
 
     function alternarConcluido(id) {
       const c = clientes.find(x => x.id === id);
-      if (c) {
-        c.concluido = !c.concluido;
-        renderizarLista();
-        gerarListaCompras();
-        falar(`${c.concluido?'Marmitas de '+c.nome+' concluídas':'Pedido de '+c.nome+' reaberto'}`);
-      }
+      if (c) { c.concluido = !c.concluido; renderizarLista(); gerarListaCompras(); }
     }
-
     function removerCliente(id) {
-      clientes = clientes.filter(x => x.id !== id);
-      renderizarLista();
-      gerarListaCompras();
+      clientes = clientes.filter(x => x.id !== id); renderizarLista(); gerarListaCompras();
     }
 
     // 🛒 LISTA DE COMPRAS INTELIGENTE
@@ -303,18 +259,13 @@
         document.getElementById('listaCompras').textContent = '— Cadastre clientes para gerar a lista de insumos —';
         return;
       }
-
-      let texto = "📦 LISTA DE COMPRAS — COZINHA MULTIPERFIL\n";
-      texto += "═══════════════════════════════════\n\n";
+      let texto = "📦 LISTA DE COMPRAS — COZINHA MULTIPERFIL\n═══════════════════════════════════\n\n";
       ativos.forEach(c => {
-        texto += `🔹 ${c.nome} — ${c.qtd}x ${c.perfilNome.split('/')[0]}\n`;
-        texto += `   ${c.cardapio}\n`;
-        if (c.restricao && c.restricao !== "Sem restrições especiais") texto += `   ⚠️ ${c.restricao}\n`;
+        texto += `🔹 ${c.nome} — ${c.qtd}x ${c.perfilNome.split('/')[0]}\n   ${c.cardapio}\n`;
+        if (c.restricao !== "Sem restrições especiais") texto += `   ⚠️ ${c.restricao}\n`;
         texto += "\n";
       });
-      texto += "═══════════════════════════════════\n";
-      texto += "✅ Total: " + ativos.reduce((s,c)=>s+c.qtd,0) + " marmitas para preparar";
-
+      texto += "═══════════════════════════════════\n✅ Total: " + ativos.reduce((s,c)=>s+c.qtd,0) + " marmitas";
       document.getElementById('listaCompras').textContent = texto;
     }
 
@@ -322,7 +273,6 @@
       navigator.clipboard.writeText(document.getElementById('listaCompras').textContent);
       alert('Lista copiada!');
     }
-
     function enviarListaWhatsApp() {
       const texto = encodeURIComponent(document.getElementById('listaCompras').textContent);
       window.open(`https://wa.me/?text=${texto}`, '_blank');
@@ -347,7 +297,6 @@
       if (!reconhecimento) {
         reconhecimento = new SR();
         reconhecimento.lang = 'pt-BR';
-        reconhecimento.continuous = false;
         reconhecimento.onstart = () => {
           ouvindo = true;
           document.getElementById('btnVoz').classList.add('ouvindo');
@@ -359,39 +308,22 @@
           processarComando(cmd);
         };
         reconhecimento.onend = pararVoz;
-        reconhecimento.onerror = pararVoz;
       }
       ouvindo ? reconhecimento.stop() : reconhecimento.start();
     }
-
     function pararVoz() {
       ouvindo = false;
       document.getElementById('btnVoz').classList.remove('ouvindo');
       document.getElementById('statusVoz').textContent = 'Toque para falar...';
     }
-
     function processarComando(cmd) {
-      if (cmd.includes('saúde') || cmd.includes('pós-operatório') || cmd.includes('sem leite')) {
-        selecionarPerfil('saude', 'Saúde');
-      } else if (cmd.includes('fitness') || cmd.includes('academia') || cmd.includes('frango') || cmd.includes('batata')) {
-        selecionarPerfil('fit', 'Performance');
-      } else if (cmd.includes('caseiro') || cmd.includes('tradicional') || cmd.includes('feijão')) {
-        selecionarPerfil('caseiro', 'Caseiro');
-      } else if (cmd.includes('solteiro') || cmd.includes('rápido') || cmd.includes('esquentar')) {
-        selecionarPerfil('solteiro', 'Praticidade');
-      } else if (cmd.includes('gourmet') || cmd.includes('massa') || cmd.includes('queijo') || cmd.includes('sabor')) {
-        selecionarPerfil('gourmet', 'Gourmet');
-      } else if (cmd.includes('cadastra') || cmd.includes('cadastrar')) {
-        cadastrarCliente();
-      } else if (cmd.includes('lista') && cmd.includes('comprar')) {
-        gerarListaCompras();
-        falar('Lista de compras gerada!');
-      } else if (cmd.includes('próxima') || cmd.includes('qual é a próxima')) {
-        const prox = clientes.find(c => !c.concluido);
-        prox ? falar(`Próxima é ${prox.nome}: ${prox.cardapio}. Lembrete: ${prox.restricao}`) : falar('Todas concluídas!');
-      } else {
-        falar('Entendi: ' + cmd + '. Use: perfil saúde, fit, caseiro, solteiro ou gourmet. Depois digite nome e cadastre.');
-      }
+      if (cmd.includes('saúde') || cmd.includes('pós-operatório')) selecionarPerfil('saude', 'Saúde');
+      else if (cmd.includes('fitness') || cmd.includes('academia')) selecionarPerfil('fit', 'Performance');
+      else if (cmd.includes('caseiro') || cmd.includes('tradicional')) selecionarPerfil('caseiro', 'Caseiro');
+      else if (cmd.includes('solteiro') || cmd.includes('rápido')) selecionarPerfil('solteiro', 'Praticidade');
+      else if (cmd.includes('gourmet') || cmd.includes('massa') || cmd.includes('queijo')) selecionarPerfil('gourmet', 'Gourmet');
+      else if (cmd.includes('cadastra') || cmd.includes('cadastrar')) cadastrarCliente();
+      else falar('Comando recebido: ' + cmd);
     }
 
     function limparFormulario() {
