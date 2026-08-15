@@ -3,471 +3,257 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cozinha Inteligente - Mãos Livres</title>
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Google Fonts: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <title>Motor HTN Interativo Funcional</title>
   <style>
     :root {
-      --bg-color: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-sub: #475569;
-      --accent-green: #10b981;
-      --accent-blue: #2563eb;
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --green: #238636;
+      --green-hover: #2ea043;
+      --red: #da3633;
+      --text: #c9d1d9;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; max-width: 900px; margin: 0 auto; }
+    h1 { color: var(--accent); margin-bottom: 20px; font-size: 1.4rem; text-align: center; }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
 
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-      padding: 12px;
-      background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    }
+    .card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
+    .card h3 { color: var(--accent); font-size: 0.95rem; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
 
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+    .state-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
+    .state-toggle input { cursor: pointer; transform: scale(1.2); }
 
-    .subtitle {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      margin-top: 4px;
-    }
+    pre { background: #010409; padding: 10px; border-radius: 6px; overflow-x: auto; color: #7ee787; font-size: 0.85rem; }
 
-    /* Painel de Controle de Voz na Bancada */
-    .voice-control-panel {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      color: #ffffff;
-      padding: 20px;
-      border-radius: 20px;
-      text-align: center;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-    }
+    .btn-container { text-align: center; margin: 20px 0; }
+    button { background: var(--green); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background 0.2s; }
+    button:hover { background: var(--green-hover); }
 
-    .voice-btn {
-      background: var(--accent-green);
-      color: #ffffff;
-      border: none;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      font-size: 2rem;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
-      transition: transform 0.2s, background-color 0.2s;
-      margin: 12px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; font-size: 0.85rem; }
+    .status-success { background: rgba(35, 134, 54, 0.2); color: #3fb950; border: 1px solid #238636; }
+    .status-fail { background: rgba(218, 54, 51, 0.2); color: #f85149; border: 1px solid #da3633; }
 
-    .voice-btn.listening {
-      background: #ef4444;
-      animation: pulse 1.2s infinite;
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-      100% { transform: scale(1); }
-    }
-
-    .voice-status {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #cbd5e1;
-    }
-
-    .voice-feedback {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 8px;
-      font-style: italic;
-      min-height: 20px;
-    }
-
-    /* Lista de Clientes e Marmitas */
-    .section-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .marmita-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-      border-left: 8px solid #ccc;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-      position: relative;
-      transition: transform 0.15s;
-    }
-
-    .marmita-card:active {
-      transform: scale(0.98);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .client-name {
-      font-size: 1.1rem;
-      font-weight: 800;
-    }
-
-    .profile-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      color: #ffffff;
-      text-transform: uppercase;
-    }
-
-    .card-menu {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 6px;
-    }
-
-    .card-restriction {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #dc2626;
-      background: #fef2f2;
-      padding: 6px 10px;
-      border-radius: 8px;
-      display: inline-block;
-      margin-top: 4px;
-    }
-
-    .card-actions {
-      margin-top: 12px;
-      display: flex;
-      gap: 8px;
-    }
-
-    .action-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .btn-speak {
-      background: #f1f5f9;
-      color: var(--text-main);
-    }
-
-    .btn-complete {
-      background: #dcfce7;
-      color: #15803d;
-    }
-
-    /* Rodapé da Logística */
-    .motoboy-bar {
-      margin-top: 24px;
-      background: #eff6ff;
-      border: 2px dashed #93c5fd;
-      padding: 16px;
-      border-radius: 16px;
-      text-align: center;
-    }
-
-    .btn-whatsapp {
-      background: #25d366;
-      color: white;
-      border: none;
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 800;
-      margin-top: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+    ol { padding-left: 20px; }
+    li { margin-bottom: 6px; font-size: 0.9rem; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🍳 Cozinha Inteligente</h1>
-    <p class="subtitle">Guia de Bancada Mãos-Livres (5 Marmitas do Dia)</p>
-  </header>
+  <h1>🧠 Motor de Planejamento HTN (Hierarchical Task Network)</h1>
 
-  <!-- Painel de Comando por Voz -->
-  <div class="voice-control-panel">
-    <p class="voice-status" id="voiceStatus">Toque no microfone para falar com o App</p>
-    <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()">🎙️</button>
-    <p class="voice-feedback" id="voiceFeedback">Exemplo: "Qual é a próxima marmita?"</p>
+  <div class="grid">
+    <!-- Controles do Estado Inicial -->
+    <div class="card">
+      <h3>1. Estado Inicial do Mundo (Simulador)</h3>
+      <div id="stateControls">
+        <!-- Gerado via JS -->
+      </div>
+    </div>
+
+    <!-- Tarefa de Alto Nível -->
+    <div class="card">
+      <h3>2. Rede de Tarefas HTN</h3>
+      <p style="font-size: 0.85rem; margin-bottom: 10px; color: #8b949e;">Objetivo de Alto Nível:</p>
+      <pre>["preparar_pedido_joao"]</pre>
+      <p style="font-size: 0.8rem; margin-top: 10px; color: #8b949e;">
+        Decomposição: Grelhar Peixe ➔ Liberar Forno ➔ Purê Zero Lactose ➔ Embalar ➔ Etiquetar.
+      </p>
+    </div>
   </div>
 
-  <!-- Lista de Marmitas dos 5 Clientes -->
-  <div class="section-title">
-    <span>📋 Pedidos Selecionados</span>
-    <span style="font-size: 0.8rem; color: var(--text-sub);" id="completedCount">0/5 Concluídas</span>
+  <div class="btn-container">
+    <button onclick="executarPlanejadorHTN()">⚙️ Executar Planejador HTN</button>
   </div>
 
-  <div id="marmitasList">
-    <!-- Os cards das 5 marmitas vão carregar aqui via JS -->
+  <!-- Resultado do Plano -->
+  <div class="card">
+    <h3>3. Sequência Plana de Ações Gerada</h3>
+    <div id="statusBadge"></div>
+    <div id="planOutput">Clique no botão acima para rodar o motor HTN.</div>
   </div>
 
-  <!-- Ações Globais / Envio ao Motoboy -->
-  <div class="motoboy-bar">
-    <h3 style="font-size: 0.95rem; color: #1e40af;">🛵 Logística Integrada de Entregas</h3>
-    <p style="font-size: 0.8rem; color: #3b82f6; margin-top: 2px;">Envie a rota completa direta para o WhatsApp do Motoboy parceiro</p>
-    <button class="btn-whatsapp" onclick="enviarParaMotoboy()">
-      📲 Disparar Rota para o Motoboy
-    </button>
-  </div>
+<script>
+// ============================================================================
+// 1. ENGINE HTN
+// ============================================================================
+class HTNPlanner {
+  constructor() {
+    this.operators = {};
+    this.methods = {};
+  }
 
-  <script>
-    // 1. Configuração do Supabase com suas Credenciais
-    const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  addOperator(name, preconditions, effects) {
+    this.operators[name] = { preconditions, effects };
+  }
 
-    // Dados Locais dos 5 Perfis de Clientes
-    const clientesLocais = [
-      {
-        id: 1,
-        nome: "João",
-        perfil: "Saúde / Pós-op",
-        cardapio: "Peixe Grelhado + Purê de Mandioquinha + Legumes no Vapor",
-        restricao: "🔴 ZERO Leite, Derivados ou Gordura",
-        cor: "#EF4444",
-        concluido: false
-      },
-      {
-        id: 2,
-        nome: "José",
-        perfil: "Performance / Shape",
-        cardapio: "150g Frango Grelhado + 100g Batata Doce",
-        restricao: "🟢 Pesagem Exata de Insumos",
-        cor: "#10B981",
-        concluido: false
-      },
-      {
-        id: 3,
-        nome: "Antônio",
-        perfil: "Saudável Equilibrado",
-        cardapio: "Bife Acebolado + Arroz + Feijão",
-        restricao: "🟡 Temperos Suaves (Sem Pimenta)",
-        cor: "#F59E0B",
-        concluido: false
-      },
-      {
-        id: 4,
-        nome: "Carla",
-        perfil: "Praticidade Solteiro",
-        cardapio: "Escondidinho de Carne Seca com Purê de Mandioca",
-        restricao: "🟣 Reaquecimento Rápido",
-        cor: "#8B5CF6",
-        concluido: false
-      },
-      {
-        id: 5,
-        nome: "Lucas",
-        perfil: "Comfort Food / Massa",
-        cardapio: "Nhoque 4 Queijos + Tiras de Mignon",
-        restricao: "🟠 Molho Encorpado / Extra Queijo",
-        cor: "#F97316",
-        concluido: false
-      }
-    ];
+  addMethod(taskName, condition, subtasks) {
+    if (!this.methods[taskName]) {
+      this.methods[taskName] = [];
+    }
+    this.methods[taskName].push({ condition, subtasks });
+  }
 
-    // Renderizar os Cards na Tela
-    function renderCards() {
-      const listEl = document.getElementById('marmitasList');
-      listEl.innerHTML = '';
+  checkConditions(state, conditions) {
+    for (let key in conditions) {
+      if (state[key] !== conditions[key]) return false;
+    }
+    return true;
+  }
 
-      let concluidas = 0;
+  applyEffects(state, effects) {
+    let newState = { ...state };
+    for (let key in effects) {
+      newState[key] = effects[key];
+    }
+    return newState;
+  }
 
-      clientesLocais.forEach((c) => {
-        if (c.concluido) concluidas++;
-
-        const card = document.createElement('div');
-        card.className = 'marmita-card';
-        card.style.borderLeftColor = c.cor;
-        if (c.concluido) card.style.opacity = '0.5';
-
-        card.innerHTML = `
-          <div class="card-header">
-            <span class="client-name">${c.nome}</span>
-            <span class="profile-badge" style="background-color: ${c.cor};">${c.perfil}</span>
-          </div>
-          <div class="card-menu">🍲 ${c.cardapio}</div>
-          <div class="card-restriction">${c.restricao}</div>
-          <div class="card-actions">
-            <button class="action-btn btn-speak" onclick="falarTexto('Marmita de ${c.nome}: ${c.cardapio}. Atenção: ${c.restricao}')">
-              🔊 Ouvir
-            </button>
-            <button class="action-btn btn-complete" onclick="alternarConcluido(${c.id})">
-              ${c.concluido ? '↩️ Refazer' : '✅ Concluir'}
-            </button>
-          </div>
-        `;
-        listEl.appendChild(card);
-      });
-
-      document.getElementById('completedCount').innerText = `${concluidas}/5 Concluídas`;
+  findPlan(state, taskList, plan = []) {
+    if (taskList.length === 0) {
+      return plan;
     }
 
-    function alternarConcluido(id) {
-      const cliente = clientesLocais.find(c => c.id === id);
-      if (cliente) {
-        cliente.concluido = !cliente.concluido;
-        renderCards();
-        if (cliente.concluido) {
-          falarTexto(`Marmita do ${cliente.nome} marcada como concluída!`);
+    let currentTask = taskList[0];
+    let remainingTasks = taskList.slice(1);
+
+    // Operador Primitivo
+    if (this.operators[currentTask]) {
+      let op = this.operators[currentTask];
+      if (this.checkConditions(state, op.preconditions)) {
+        let nextState = this.applyEffects(state, op.effects);
+        let result = this.findPlan(nextState, remainingTasks, [...plan, currentTask]);
+        if (result !== null) return result;
+      }
+      return null; // Falha nas pré-condições (Backtrack)
+    }
+
+    // Tarefa Composta (Método)
+    if (this.methods[currentTask]) {
+      for (let method of this.methods[currentTask]) {
+        if (method.condition(state)) {
+          let newTaskList = [...method.subtasks, ...remainingTasks];
+          let result = this.findPlan(state, newTaskList, plan);
+          if (result !== null) return result;
         }
       }
     }
 
-    // Sistema de Voz (Sintetizador + Reconhecimento)
-    function falarTexto(texto) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(texto);
-        utterance.lang = 'pt-BR';
-        utterance.rate = 1.0;
-        window.speechSynthesis.speak(utterance);
-      } else {
-        alert(texto);
-      }
-    }
+    return null;
+  }
+}
 
-    let isListening = false;
-    let recognition = null;
+// ============================================================================
+// 2. DOMÍNIO E REGRAS
+// ============================================================================
+const planner = new HTNPlanner();
 
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.lang = 'pt-BR';
-      recognition.continuous = false;
+// Estado Dinâmico
+let estadoMundo = {
+  forno_ocupado: false,
+  peixe_grelhado: false,
+  pure_sem_leite: false,
+  marmita_joao_embalada: false,
+  marmita_joao_etiquetada: false
+};
 
-      recognition.onstart = function() {
-        isListening = true;
-        document.getElementById('voiceBtn').classList.add('listening');
-        document.getElementById('voiceStatus').innerText = "Ouvindo você...";
-      };
+// Operadores
+planner.addOperator('grelhar_peixe', 
+  { forno_ocupado: false, peixe_grelhado: false }, 
+  { peixe_grelhado: true, forno_ocupado: true }
+);
 
-      recognition.onresult = function(event) {
-        const command = event.results[0][0].transcript.toLowerCase();
-        document.getElementById('voiceFeedback').innerText = `Você disse: "${command}"`;
-        processarComando(command);
-      };
+planner.addOperator('liberar_forno', 
+  { forno_ocupado: true }, 
+  { forno_ocupado: false }
+);
 
-      recognition.onerror = function() {
-        pararVoz();
-      };
+planner.addOperator('preparar_pure_zero_lactose', 
+  { pure_sem_leite: false }, 
+  { pure_sem_leite: true }
+);
 
-      recognition.onend = function() {
-        pararVoz();
-      };
-    }
+planner.addOperator('embalar_marmita_joao', 
+  { peixe_grelhado: true, pure_sem_leite: true, marmita_joao_embalada: false }, 
+  { marmita_joao_embalada: true }
+);
 
-    function pararVoz() {
-      isListening = false;
-      document.getElementById('voiceBtn').classList.remove('listening');
-      document.getElementById('voiceStatus').innerText = "Toque no microfone para falar com o App";
-    }
+planner.addOperator('colocar_etiqueta_vermelha', 
+  { marmita_joao_embalada: true, marmita_joao_etiquetada: false }, 
+  { marmita_joao_etiquetada: true }
+);
 
-    function toggleVoiceRecognition() {
-      if (!recognition) {
-        alert("O seu navegador não suporta reconhecimento de voz direto. Tente usar o Google Chrome no celular ou PC.");
-        return;
-      }
-      if (isListening) {
-        recognition.stop();
-      } else {
-        recognition.start();
-      }
-    }
+// Métodos de Decomposição
+planner.addMethod('preparar_pedido_joao',
+  (state) => true,
+  [
+    'grelhar_peixe',
+    'liberar_forno',
+    'preparar_pure_zero_lactose',
+    'embalar_marmita_joao',
+    'colocar_etiqueta_vermelha'
+  ]
+);
 
-    function processarComando(comando) {
-      if (comando.includes('próxima') || comando.includes('primeira') || comando.includes('quem')) {
-        const proxima = clientesLocais.find(c => !c.concluido);
-        if (proxima) {
-          falarTexto(`A próxima marmita é do ${proxima.nome}. ${proxima.cardapio}. Lembrete importante: ${proxima.restricao}`);
-        } else {
-          falarTexto("Parabéns! Todas as 5 marmitas do dia já estão concluídas!");
-        }
-      } else if (comando.includes('joão')) {
-        falarTexto("Marmita do João: Peixe grelhado, purê e legumes. ZERO leite!");
-      } else if (comando.includes('josé')) {
-        falarTexto("Marmita do José: 150 gramas de frango e 100 gramas de batata doce.");
-      } else if (comando.includes('motoboy') || comando.includes('entrega')) {
-        enviarParaMotoboy();
-      } else {
-        falarTexto("Desculpe, não entendi o comando. Tente perguntar: qual é a próxima marmita?");
-      }
-    }
+// ============================================================================
+// 3. INTERFACE E INTERATIVIDADE
+// ============================================================================
+function renderControls() {
+  const container = document.getElementById('stateControls');
+  container.innerHTML = '';
 
-    // Disparo para o WhatsApp do Motoboy
-    function enviarParaMotoboy() {
-      const mensagem = encodeURIComponent(
-        `Olá, Marcos! Pedido de coleta pronto para entrega:\n\n` +
-        `📍 Retirada: Cozinha da Ana\n` +
-        `📦 Total: 5 Marmitas identificadas por cores:\n` +
-        `1. 🔴 João - Pós-Op (Rua A, 45)\n` +
-        `2. 🟢 José - Shape (Rua B, 102)\n` +
-        `3. 🟡 Antônio - Caseiro (Av C, 500)\n` +
-        `4. 🟣 Carla - Solteiro (Rua D, 12)\n` +
-        `5. 🟠 Lucas - Comfort (Rua E, 88)\n\n` +
-        `🛵 Pode passar para retirar!`
-      );
-      window.open(`https://wa.me/?text=${mensagem}`, '_blank');
-    }
+  for (let key in estadoMundo) {
+    const div = document.createElement('div');
+    div.className = 'state-toggle';
+    div.innerHTML = `
+      <label for="${key}">${key}:</label>
+      <input type="checkbox" id="${key}" ${estadoMundo[key] ? 'checked' : ''} onchange="updateState('${key}', this.checked)">
+    `;
+    container.appendChild(div);
+  }
+}
 
-    // Inicialização
-    renderCards();
-  </script>
+function updateState(key, value) {
+  estadoMundo[key] = value;
+}
+
+function executarPlanejadorHTN() {
+  // Executa uma cópia para não alterar diretamente o estado do DOM durante a simulação
+  let estadoAtual = { ...estadoMundo };
+  let plano = planner.findPlan(estadoAtual, ['preparar_pedido_joao']);
+
+  const statusBadge = document.getElementById('statusBadge');
+  const outputEl = document.getElementById('planOutput');
+
+  if (plano) {
+    statusBadge.className = 'status-badge status-success';
+    statusBadge.innerText = '✓ PLANO GERADO COM SUCESSO';
+    
+    let htmlList = '<ol>';
+    plano.forEach(acao => {
+      htmlList += `<li><code>${acao}</code></li>`;
+    });
+    htmlList += '</ol>';
+    outputEl.innerHTML = htmlList;
+  } else {
+    statusBadge.className = 'status-badge status-fail';
+    statusBadge.innerText = '✗ FALHA DE PLANEJAMENTO (CONFLITO DE PRÉ-CONDIÇÕES)';
+    outputEl.innerHTML = `
+      <p style="color: #f85149; font-size: 0.85rem;">
+        O motor HTN não conseguiu encontrar uma sequência válida.<br/>
+        <strong>Motivo comum:</strong> Se o <code>forno_ocupado</code> já estiver marcado como <i>true</i>, o operador <code>grelhar_peixe</code> falha na pré-condição.
+      </p>
+    `;
+  }
+}
+
+// Inicializar
+renderControls();
+</script>
 </body>
 </html>
