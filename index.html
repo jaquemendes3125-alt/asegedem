@@ -320,8 +320,8 @@
     <div class="login-box">
       <h2>🔒 Acesso Restrito</h2>
       <p>Digite a senha para acessar a Cozinha Inteligente</p>
-      <input type="password" id="passwordInput" class="login-input" placeholder="Sua senha">
-      <button type="button" class="login-btn" onclick="verificarSenha()">Entrar</button>
+      <input type="password" id="passwordInput" class="login-input" placeholder="Sua senha" onkeypress="if(event.key==='Enter') verificarSenha()">
+      <button class="login-btn" onclick="verificarSenha()">Entrar</button>
       <p class="error-msg" id="errorMsg">Senha incorreta. Tente novamente!</p>
     </div>
   </div>
@@ -364,29 +364,26 @@
     // Configuração de Segurança por Senha
     const SENHA_CORRETA = "siesta"; // Altere aqui para a senha que quiser!
 
-    function verificarSenha() {
-      const senhaInput = document.getElementById('passwordInput').value.trim();
-      const errorMsg = document.getElementById('errorMsg');
+    function abrirApp() {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('appContent').style.display = 'block';
+      renderCards();
+    }
 
+    function verificarSenha() {
+      const senhaInput = document.getElementById('passwordInput').value;
       if (senhaInput === SENHA_CORRETA) {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('appContent').style.display = 'block';
-        if (errorMsg) errorMsg.style.display = 'none';
-        renderCards();
+        localStorage.setItem('cozinha_autenticada', 'true');
+        abrirApp();
       } else {
-        if (errorMsg) errorMsg.style.display = 'block';
+        document.getElementById('errorMsg').style.display = 'block';
       }
     }
 
-    // Permite logar apertando a tecla Enter na caixa de senha
-    document.addEventListener("DOMContentLoaded", function() {
-      const input = document.getElementById('passwordInput');
-      if (input) {
-        input.addEventListener('keyup', function(event) {
-          if (event.key === 'Enter') {
-            verificarSenha();
-          }
-        });
+    // Verificar se já logou anteriormente no mesmo dispositivo ao carregar a página
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('cozinha_autenticada') === 'true') {
+        abrirApp();
       }
     });
 
