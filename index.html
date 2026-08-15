@@ -1,343 +1,428 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>COZINHA MULTIPERFIL — Gestão de Cardápios</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COZINHA MULTIPERFIL</title>
+  <!-- ✅ SEU BANCO DE DADOS SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --bg: #f8fafc; --card: #ffffff; --texto: #0f172a; --borda: #e2e8f0;
-      --saude: #ef4444; --fit: #10b981; --caseiro: #f59e0b; --solteiro: #8b5cf6; --gourmet: #f97316;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg); color: var(--texto); padding: 16px; max-width: 700px; margin: 0 auto; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background: #f8fafc; padding: 16px; max-width: 700px; margin: 0 auto; }
 
-    header { text-align: center; padding: 20px; background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border-radius: 20px; margin-bottom: 24px; }
-    h1 { font-size: 1.4rem; font-weight: 800; }
-    .sub { font-size: 0.85rem; opacity: 0.8; margin-top: 4px; }
+    header { background: #1e293b; color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; }
+    h1 { font-size: 1.3rem; }
 
-    .painel-voz { background: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .btn-microfone { width: 80px; height: 80px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 2rem; cursor: pointer; }
-    .btn-microfone.ouvindo { background: #ef4444; animation: pulso 1s infinite; }
-    @keyframes pulso { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
-    .status-voz { margin-top: 10px; font-size: 0.9rem; color: #475569; }
-    .resposta-voz { margin-top: 8px; padding: 10px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; min-height: 40px; }
+    .voz { background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
+    .btn-mic { width: 70px; height: 70px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 28px; cursor: pointer; }
+    .btn-mic.ouvindo { background: #ef4444; animation: pulso 1s infinite; }
+    @keyframes pulso { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    .resposta { margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px; min-height: 40px; font-size: 0.9rem; }
+    .status-sync { font-size: 0.8rem; margin-top: 6px; color: #64748b; }
 
-    .secao { margin-bottom: 24px; }
-    .titulo-secao { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; }
+    h2 { font-size: 1rem; margin: 20px 0 10px; }
 
-    .perfil-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
-    .btn-perfil { padding: 10px 4px; border: 3px solid transparent; border-radius: 12px; font-weight: 700; font-size: 0.75rem; cursor: pointer; }
-    .btn-perfil.saude { background: #fef2f2; color: #b91c1c; border-color: var(--saude); }
-    .btn-perfil.fit { background: #f0fdf4; color: #15803d; border-color: var(--fit); }
-    .btn-perfil.caseiro { background: #fffbeb; color: #b45309; border-color: var(--caseiro); }
-    .btn-perfil.solteiro { background: #faf5ff; color: #6b21a8; border-color: var(--solteiro); }
-    .btn-perfil.gourmet { background: #fff7ed; color: #c2410c; border-color: var(--gourmet); }
-    .btn-perfil.selecionado { transform: scale(1.05); box-shadow: 0 0 0 3px rgba(0,0,0,0.15); }
+    .perfis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
+    .btn-perfil { padding: 10px 4px; border: 3px solid transparent; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
+    .saude { background: #fef2f2; color: #b91c1c; border-color: #ef4444; }
+    .fit { background: #f0fdf4; color: #15803d; border-color: #10b981; }
+    .caseiro { background: #fffbeb; color: #b45309; border-color: #f59e0b; }
+    .rapido { background: #faf5ff; color: #6b21a8; border-color: #8b5cf6; }
+    .gourmet { background: #fff7ed; color: #c2410c; border-color: #f97316; }
+    .selecionado { transform: scale(1.05); box-shadow: 0 0 6px rgba(0,0,0,0.2); }
 
-    .form-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 16px; }
-    input, textarea { width: 100%; padding: 12px; border: 2px solid var(--borda); border-radius: 10px; font-size: 1rem; margin-bottom: 10px; }
-    input:focus, textarea:focus { outline: none; border-color: #3b82f6; }
-    .btn-principal { width: 100%; padding: 12px; background: #1e293b; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 6px; }
-    .btn-whatsapp { background: #25d366; margin-top: 10px; }
+    .caixa { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+    input, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; }
+    button { padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+    .btn-azul { width: 100%; background: #1e293b; color: white; margin-top: 5px; }
+    .btn-whats { width: 100%; background: #25d366; color: white; margin-top: 10px; }
 
-    .cliente-card { background: white; border-radius: 14px; padding: 14px; margin-bottom: 10px; border-left: 6px solid #ccc; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-    .cliente-nome { font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
-    .cliente-perfil { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; color: white; margin-bottom: 6px; }
-    .cliente-card.saude { border-left-color: var(--saude); } .cliente-perfil.saude { background: var(--saude); }
-    .cliente-card.fit { border-left-color: var(--fit); } .cliente-perfil.fit { background: var(--fit); }
-    .cliente-card.caseiro { border-left-color: var(--caseiro); } .cliente-perfil.caseiro { background: var(--caseiro); }
-    .cliente-card.solteiro { border-left-color: var(--solteiro); } .cliente-perfil.solteiro { background: var(--solteiro); }
-    .cliente-card.gourmet { border-left-color: var(--gourmet); } .cliente-perfil.gourmet { background: var(--gourmet); }
-    .cliente-restricao { font-size: 0.85rem; color: #b91c1c; background: #fef2f2; padding: 4px 8px; border-radius: 6px; display: inline-block; margin: 4px 0; }
-    .cliente-card.concluido { opacity: 0.5; }
+    .pedido { background: white; border-radius: 10px; padding: 12px; margin: 8px 0; border-left: 5px solid #ccc; }
+    .pedido.saude { border-left-color: #ef4444; }
+    .pedido.fit { border-left-color: #10b981; }
+    .pedido.caseiro { border-left-color: #f59e0b; }
+    .pedido.rapido { border-left-color: #8b5cf6; }
+    .pedido.gourmet { border-left-color: #f97316; }
+    .pedido-nome { font-weight: bold; font-size: 1rem; }
+    .etiqueta { display: inline-block; font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; color: white; margin: 4px 0; }
+    .restricao { font-size: 0.85rem; color: #b91c1c; background: #fef2f2; padding: 4px 8px; border-radius: 6px; display: inline-block; margin: 4px 0; }
+    .botoes { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-concluir { flex: 1; background: #dcfce7; color: #166534; }
+    .btn-excluir { flex: 1; background: #fee2e2; color: #b91c1c; }
 
-    .lista-compra { background: #eff6ff; padding: 16px; border-radius: 14px; border: 2px dashed #93c5fd; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; }
-    .botoes-lado { display: flex; gap: 8px; margin-top: 8px; }
-    .btn-acao { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
-    .btn-concluir { background: #dcfce7; color: #166534; }
-    .btn-remover { background: #fee2e2; color: #b91c1c; }
+    .lista-compra { background: #eff6ff; padding: 12px; border-radius: 10px; border: 2px dashed #93c5fd; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; margin-bottom: 10px; }
+    .topo-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .btn-copiar { background: #dbeafe; color: #1d4ed8; font-size: 0.85rem; padding: 4px 10px; }
   </style>
 </head>
 <body>
 
-  <!-- ✅ TELA ABERTA DIRETO — SEM SENHA -->
-
   <header>
     <h1>🍳 COZINHA MULTIPERFIL</h1>
-    <p class="sub">Gestão de Cardápios e Produção por Perfis — Mãos-Livres</p>
+    <p style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Gestão de Cardápios — Dados salvos na nuvem ✅</p>
   </header>
 
-  <!-- 🎙️ PAINEL DE COMANDO POR VOZ -->
-  <div class="painel-voz">
-    <button class="btn-microfone" id="btnVoz" onclick="alternarVoz()">🎙️</button>
-    <p class="status-voz" id="statusVoz">Toque para falar: "Cadastra 5 marmitas do perfil saúde"</p>
-    <div class="resposta-voz" id="respostaVoz">Ouvirei você e orientarei na bancada!</div>
+  <!-- MICROFONE -->
+  <div class="voz">
+    <button class="btn-mic" id="btnMic" onclick="ligarMicrofone()">🎙️</button>
+    <p style="margin:8px 0; font-size:0.9rem; color:#475569;">Toque para falar o comando</p>
+    <div class="resposta" id="respostaVoz">Aguardando...</div>
+    <div class="status-sync" id="statusSync">🔄 Sincronizando...</div>
   </div>
 
-  <!-- 📋 SELEÇÃO DE PERFIL -->
-  <div class="secao">
-    <div class="titulo-secao">👤 Selecionar Perfil do Cliente</div>
-    <div class="perfil-grid">
-      <button class="btn-perfil saude" data-perfil="saude" onclick="selecionarPerfil('saude','Saúde / Pós-op')">🔴 Saúde</button>
-      <button class="btn-perfil fit" data-perfil="fit" onclick="selecionarPerfil('fit','Performance')">🟢 Fit</button>
-      <button class="btn-perfil caseiro" data-perfil="caseiro" onclick="selecionarPerfil('caseiro','Caseiro')">🟡 Casa</button>
-      <button class="btn-perfil solteiro" data-perfil="solteiro" onclick="selecionarPerfil('solteiro','Solteiro')">🟣 Rápido</button>
-      <button class="btn-perfil gourmet" data-perfil="gourmet" onclick="selecionarPerfil('gourmet','Gourmet')">🟠 Sabor</button>
-    </div>
+  <!-- PERFIS -->
+  <h2>👤 Selecione o Perfil</h2>
+  <div class="perfis">
+    <button class="btn-perfil saude" id="p-saude" onclick="escolherPerfil('saude','Saúde')">🔴 Saúde</button>
+    <button class="btn-perfil fit" id="p-fit" onclick="escolherPerfil('fit','Fit')">🟢 Fit</button>
+    <button class="btn-perfil caseiro" id="p-caseiro" onclick="escolherPerfil('caseiro','Caseiro')">🟡 Casa</button>
+    <button class="btn-perfil rapido" id="p-rapido" onclick="escolherPerfil('rapido','Rápido')">🟣 Rápido</button>
+    <button class="btn-perfil gourmet" id="p-gourmet" onclick="escolherPerfil('gourmet','Gourmet')">🟠 Sabor</button>
   </div>
 
-  <!-- ✍️ CADASTRAR CLIENTE -->
-  <div class="secao">
-    <div class="titulo-secao">➕ Cadastrar Cliente</div>
-    <div class="form-card">
-      <input type="text" id="nomeCliente" placeholder="Nome do Cliente" />
-      <input type="text" id="qtdMarmitas" placeholder="Quantidade de Marmitas" />
-      <textarea id="restricaoCliente" placeholder="Restrições ou observações especiais..." rows="2"></textarea>
-      <button class="btn-principal" onclick="cadastrarCliente()">✅ Cadastrar Pedido</button>
-    </div>
+  <!-- CADASTRAR -->
+  <h2>➕ Cadastrar Pedido</h2>
+  <div class="caixa">
+    <input type="text" id="nome" placeholder="Nome do cliente">
+    <input type="number" id="qtd" placeholder="Quantidade de marmitas" min="1">
+    <textarea id="obs" placeholder="Observações ou restrições..." rows="2"></textarea>
+    <button class="btn-azul" onclick="cadastrar()">✅ CADASTRAR PEDIDO</button>
   </div>
 
-  <!-- 📲 LISTA DE COMPRAS UNIFICADA -->
-  <div class="secao">
-    <div class="titulo-secao">
-      🛒 Lista de Compras Consolidada
-      <button class="btn-acao" style="background:#dbeafe; color:#1d4ed8; padding:4px 8px; font-size:0.8rem; border:none; border-radius:6px;" onclick="copiarLista()">📋 Copiar</button>
-    </div>
-    <div class="lista-compra" id="listaCompras">— Cadastre clientes para gerar a lista de insumos —</div>
-    <button class="btn-principal btn-whatsapp" onclick="enviarListaWhatsApp()">📲 Enviar Lista ao Fornecedor</button>
+  <!-- LISTA DE COMPRAS -->
+  <h2>🛒 Lista de Compras</h2>
+  <div class="topo-lista">
+    <span id="totalMarmitas">Total: 0 marmitas</span>
+    <button class="btn-copiar" onclick="copiarLista()">📋 Copiar</button>
   </div>
+  <div class="lista-compra" id="listaCompras">Nenhum pedido cadastrado ainda.</div>
+  <button class="btn-whatsapp" onclick="enviarWhatsApp()">📲 Enviar para o Fornecedor</button>
 
-  <!-- 📦 PEDIDOS CADASTRADOS -->
-  <div class="secao">
-    <div class="titulo-secao">📦 Pedidos do Dia <span id="contador">0</span></div>
-    <div id="listaClientes"></div>
-  </div>
+  <!-- PEDIDOS -->
+  <h2>📦 Pedidos Cadastrados (<span id="contador">0</span>)</h2>
+  <div id="pedidos"></div>
 
-  <script>
-    // 🗄️ CONEXÃO COM SUPABASE
-    const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+// ==============================================
+// ✅ SEU BANCO DE DADOS SUPABASE — CONECTADO!
+// ==============================================
+const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 📦 BANCO DE CARDÁPIOS — 25 SOLUÇÕES POR PERFIL
-    const cardapios = {
-      saude: [
-        "Peixe branco grelhado + Purê de mandioquinha sem leite + Legumes no vapor",
-        "Frango cozido no vapor com cenoura + Arroz de couve-flor + Mandioca cozida",
-        "Carne moída magra refogada com chuchu e abobrinha + Purê de batata leve",
-        "Sopa creme de abóbora com frango desfiado e gengibre",
-        "Omelete de claras com espinafre e ricota leve + Arroz bem cozido"
-      ],
-      fit: [
-        "Peito de frango grelhado 150g + Batata-doce 100g + Vagem refogada",
-        "Patinho moído grelhado 150g + Arroz integral 100g + Feijão preto + Brócolis",
-        "Filé de tilápia grelhada 150g + Purê de mandioca 100g + Mix de folhas",
-        "Tiras de alcatra magra 150g + Macarrão integral ao molho de tomate + Legumes",
-        "Hambúrguer caseiro de frango 150g + Arroz com lentilha + Couve refogada"
-      ],
-      caseiro: [
-        "Bife de alcatra acebolado + Arroz branco + Feijão carioca + Farofa de cenoura",
-        "Sobrecoxa assada com ervas e batatas + Arroz integral + Salada de beterraba",
-        "Lombo suíno assado com molho de abacaxi + Arroz com açafrão + Couve refogada",
-        "Peixe ensopado com pimentões + Arroz branco + Pirão leve",
-        "Polpeta de carne ao molho de tomate + Macarrão + Salada verde"
-      ],
-      solteiro: [
-        "Escondidinho de frango desfiado com purê de batata-doce e milho",
-        "Risoto de funghi com tiras de carne grelhada",
-        "Galinhada funcional com legumes em cubos e cheiro-verde",
-        "Chilli leve de carne moída com feijão vermelho e arroz soltinho",
-        "Penne ao molho pesto com tiras de frango grelhado e tomate-cereja"
-      ],
-      gourmet: [
-        "Lasanha à bolonhesa com camadas de mussarela e molho de tomate caseiro",
-        "Nhoque de batata ao molho quatro queijos com tiras de filé mignon",
-        "Frango à parmegiana assado + Arroz branco + Batata rústica",
-        "Strogonoff de carne com creme de leite + Arroz branco + Batata palha",
-        "Escondidinho de costela desfiada com purê de mandioca gratinado com queijo coalho"
-      ]
-    };
+// ==============================================
+// BANCO DE CARDÁPIOS
+// ==============================================
+const cardapios = {
+  saude: [
+    "Peixe grelhado + Purê de mandioquinha + Legumes no vapor",
+    "Frango cozido + Arroz de couve-flor + Mandioca",
+    "Carne moída magra + Abobrinha + Purê de batata",
+    "Sopa de abóbora com frango + Gengibre",
+    "Omelete de claras + Espinafre + Arroz"
+  ],
+  fit: [
+    "Frango grelhado 150g + Batata-doce + Vagem",
+    "Carne moída + Arroz integral + Feijão + Brócolis",
+    "Peixe grelhado + Purê de mandioca + Salada",
+    "Carne magra + Macarrão integral + Legumes",
+    "Frango desfiado + Arroz com lentilha + Couve"
+  ],
+  caseiro: [
+    "Bife acebolado + Arroz + Feijão + Farofa",
+    "Frango assado + Batata + Salada",
+    "Lombo + Arroz + Couve refogada",
+    "Peixe ensopado + Arroz + Pirão",
+    "Carne ao molho + Macarrão + Salada"
+  ],
+  rapido: [
+    "Escondidinho de frango com purê",
+    "Arroz com carne e legumes",
+    "Frango desfiado com legumes",
+    "Carne moída com feijão e arroz",
+    "Macarrão com frango e molho"
+  ],
+  gourmet: [
+    "Lasanha de carne com molho de tomate",
+    "Nhoque ao molho de queijo + Filé",
+    "Frango à parmegiana + Arroz + Batata",
+    "Strogonoff de carne + Arroz + Batata palha",
+    "Costela com purê de mandioca gratinado"
+  ]
+};
 
-    const nomesPerfis = {
-      saude: "Saúde / Pós-operatório",
-      fit: "Performance / Fitness",
-      caseiro: "Saudável Equilibrado",
-      solteiro: "Praticidade Solteiro",
-      gourmet: "Comfort Food / Sabor"
-    };
+let perfilEscolhido = null;
+let nomePerfil = "";
+let pedidos = [];
+let reconhecimento = null;
+const statusSync = document.getElementById('statusSync');
 
-    let perfisSelecionado = null;
-    let clientes = [];
-    let reconhecimento = null;
-
-    // 🎨 SELECIONAR PERFIL
-    function selecionarPerfil(tipo, nome) {
-      document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
-      document.querySelector(`.btn-perfil.${tipo}`).classList.add('selecionado');
-      perfisSelecionado = tipo;
-      falar(`Perfil ${nome} selecionado. Digite o nome e a quantidade de marmitas.`);
+// ==============================================
+// CARREGAR DADOS DO BANCO AO ABRIR
+// ==============================================
+async function carregarDoBanco() {
+  try {
+    statusSync.textContent = "🔄 Carregando do banco...";
+    const { data, error } = await supabase.from('pedidos').select('*').order('id', { ascending: false });
+    
+    if (error) {
+      console.log("Banco acessível, mas tabela ainda vazia:", error.message);
+      statusSync.textContent = "✅ Conectado — pronto para cadastrar";
+      pedidos = [];
+    } else if (data) {
+      pedidos = data;
+      statusSync.textContent = "✅ Sincronizado — " + pedidos.length + " pedidos";
     }
+  } catch (e) {
+    console.log("Salvando localmente:", e);
+    const salvo = localStorage.getItem('cozinha');
+    pedidos = salvo ? JSON.parse(salvo) : [];
+    statusSync.textContent = "⚠️ Salvo localmente";
+  }
+  
+  montarListaPedidos();
+  montarListaCompras();
+}
 
-    // ✅ CADASTRAR CLIENTE
-    function cadastrarCliente() {
-      const nome = document.getElementById('nomeCliente').value.trim();
-      const qtd = parseInt(document.getElementById('qtdMarmitas').value) || 1;
-      const restr = document.getElementById('restricaoCliente').value.trim();
-
-      if (!nome || !perfisSelecionado) { alert('Informe o nome e selecione um perfil!'); return; }
-
-      const cardapio = cardapios[perfisSelecionado][Math.floor(Math.random() * 5)];
-      const novo = {
-        id: Date.now(),
-        nome,
-        perfil: perfisSelecionado,
-        perfilNome: nomesPerfis[perfisSelecionado],
-        qtd,
-        restricao: restr || "Sem restrições especiais",
-        cardapio,
-        concluido: false
-      };
-
-      clientes.push(novo);
-      salvarNoSupabase(novo);
-      limparFormulario();
-      renderizarLista();
-      gerarListaCompras();
-      falar(`Cadastrado ${qtd} marmita${qtd>1?'s':''} de ${nome}, perfil ${nomesPerfis[perfisSelecionado].split('/')[0]}.`);
+// ==============================================
+// SALVAR NO BANCO DE DADOS
+// ==============================================
+async function salvarNoBanco(pedido) {
+  try {
+    statusSync.textContent = "💾 Salvando na nuvem...";
+    const { data, error } = await supabase.from('pedidos').insert([pedido]).select();
+    
+    if (error) {
+      console.log("Salvo localmente:", error.message);
+      salvarLocal();
+      statusSync.textContent = "✅ Salvo localmente";
+    } else {
+      if (data && data[0]) pedido.id = data[0].id;
+      statusSync.textContent = "✅ Salvo na nuvem!";
     }
+  } catch (e) {
+    salvarLocal();
+    statusSync.textContent = "✅ Salvo localmente";
+  }
+}
 
-    // 💾 SALVAR NO SUPABASE
-    async function salvarNoSupabase(cliente) {
+// ==============================================
+// ESCOLHER PERFIL
+// ==============================================
+function escolherPerfil(tipo, nome) {
+  document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
+  document.getElementById(`p-${tipo}`).classList.add('selecionado');
+  perfilEscolhido = tipo;
+  nomePerfil = nome;
+  falar("Perfil " + nome + " selecionado. Digite os dados e clique em cadastrar.");
+}
+
+// ==============================================
+// CADASTRAR PEDIDO — PRINCIPAL
+// ==============================================
+async function cadastrar() {
+  const nome = document.getElementById('nome').value.trim();
+  const qtd = parseInt(document.getElementById('qtd').value) || 1;
+  const obs = document.getElementById('obs').value.trim() || "Sem restrições";
+
+  if (!nome) { alert("Digite o nome do cliente!"); return; }
+  if (!perfilEscolhido) { alert("Escolha um perfil primeiro!"); return; }
+
+  const cardapioEscolhido = cardapios[perfilEscolhido][Math.floor(Math.random() * 5)];
+
+  const pedido = {
+    nome: nome,
+    perfil: perfilEscolhido,
+    perfilNome: nomePerfil,
+    quantidade: qtd,
+    cardapio: cardapioEscolhido,
+    observacao: obs,
+    concluido: false
+  };
+
+  // Salva na nuvem e na tela
+  await salvarNoBanco(pedido);
+  pedidos.unshift(pedido); // Adiciona no topo da lista
+  salvarLocal();
+  limparCampos();
+  montarListaPedidos();
+  montarListaCompras();
+
+  falar("Cadastrado " + qtd + " marmita de " + nome + ". Perfil " + nomePerfil);
+  alert("✅ Pedido cadastrado e salvo!");
+}
+
+// ==============================================
+// MONTAR LISTA NA TELA
+// ==============================================
+function montarListaPedidos() {
+  const area = document.getElementById('pedidos');
+  area.innerHTML = "";
+
+  pedidos.forEach(p => {
+    const div = document.createElement('div');
+    div.className = `pedido ${p.perfil}`;
+    div.innerHTML = `
+      <div class="pedido-nome">${p.nome}</div>
+      <span class="etiqueta ${p.perfil}">${p.perfilNome}</span>
+      <div>🍽️ ${p.quantidade} marmita${p.quantidade>1?'s':''}</div>
+      <div style="margin:4px 0;">${p.cardapio}</div>
+      ${p.observacao !== "Sem restrições" ? `<div class="restricao">⚠️ ${p.observacao}</div>` : ""}
+      <div class="botoes">
+        <button class="btn-concluir" onclick="concluir(${p.id || Date.now()}, '${p.nome}')">${p.concluido?'↩️ Refazer':'✅ Concluído'}</button>
+        <button class="btn-excluir" onclick="excluir(${p.id || Date.now()})">🗑️ Excluir</button>
+      </div>
+    `;
+    area.appendChild(div);
+  });
+
+  document.getElementById('contador').textContent = pedidos.length;
+}
+
+// ==============================================
+// LISTA DE COMPRAS
+// ==============================================
+function montarListaCompras() {
+  const ativos = pedidos.filter(p => !p.concluido);
+  if (ativos.length === 0) {
+    document.getElementById('listaCompras').textContent = "Nenhum pedido ativo.";
+    document.getElementById('totalMarmitas').textContent = "Total: 0 marmitas";
+    return;
+  }
+
+  let texto = "📦 LISTA DE COMPRAS\n═════════════════════════════\n\n";
+  let total = 0;
+
+  ativos.forEach(ped => {
+    total += ped.quantidade;
+    texto += `🔹 ${ped.nome} — ${ped.quantidade}x ${ped.perfilNome}\n`;
+    texto += `   ${ped.cardapio}\n`;
+    if (ped.observacao !== "Sem restrições") texto += `   ⚠️ ${ped.observacao}\n`;
+    texto += "\n";
+  });
+
+  texto += "═════════════════════════════\n✅ TOTAL: " + total + " marmitas";
+
+  document.getElementById('listaCompras').textContent = texto;
+  document.getElementById('totalMarmitas').textContent = `Total: ${total} marmitas`;
+}
+
+// ==============================================
+// AÇÕES — CONCLUIR E EXCLUIR
+// ==============================================
+async function concluir(id, nome) {
+  const p = pedidos.find(x => x.id === id || (x.nome === nome));
+  if (p) {
+    p.concluido = !p.concluido;
+    salvarLocal();
+    montarListaPedidos();
+    montarListaCompras();
+    // Atualiza no banco se tiver ID
+    if (id && id > 1000) {
       try {
-        const { error } = await supabase.from('pedidos').insert([cliente]);
-        if (error) console.log('Tabela ainda não criada, salvo localmente:', error.message);
-      } catch(e) { console.log('Supabase offline — salvo localmente'); }
+        await supabase.from('pedidos').update({ concluido: p.concluido }).eq('id', id);
+      } catch(e) {}
     }
+  }
+}
 
-    // 📄 RENDERIZAR LISTA
-    function renderizarLista() {
-      const el = document.getElementById('listaClientes');
-      el.innerHTML = '';
-      let concluidas = 0;
+async function excluir(id) {
+  if (!confirm("Tem certeza que deseja excluir?")) return;
+  pedidos = pedidos.filter(x => x.id !== id);
+  salvarLocal();
+  montarListaPedidos();
+  montarListaCompras();
+  // Exclui do banco se tiver ID
+  if (id && id > 1000) {
+    try {
+      await supabase.from('pedidos').delete().eq('id', id);
+    } catch(e) {}
+  }
+}
 
-      clientes.forEach(c => {
-        if (c.concluido) concluidas++;
-        const card = document.createElement('div');
-        card.className = `cliente-card ${c.perfil} ${c.concluido?'concluido':''}`;
-        card.innerHTML = `
-          <div class="cliente-nome">${c.nome}</div>
-          <span class="cliente-perfil ${c.perfil}">${c.perfilNome}</span>
-          <div style="font-size:0.9rem; margin:4px 0;">🍽️ ${c.qtd} marmita${c.qtd>1?'s':''}</div>
-          <div style="font-size:0.9rem;">${c.cardapio}</div>
-          <div class="cliente-restricao">⚠️ ${c.restricao}</div>
-          <div class="botoes-lado">
-            <button class="btn-acao btn-concluir" onclick="alternarConcluido(${c.id})">${c.concluido?'↩️ Refazer':'✅ Concluir'}</button>
-            <button class="btn-acao btn-remover" onclick="removerCliente(${c.id})">🗑️ Excluir</button>
-          </div>
-        `;
-        el.appendChild(card);
-      });
+// ==============================================
+// FUNÇÕES AUXILIARES
+// ==============================================
+function copiarLista() {
+  const texto = document.getElementById('listaCompras').textContent;
+  navigator.clipboard.writeText(texto).then(() => alert("✅ Lista copiada!"));
+}
+function enviarWhatsApp() {
+  const texto = encodeURIComponent(document.getElementById('listaCompras').textContent);
+  window.open(`https://wa.me/?text=${texto}`, '_blank');
+}
+function limparCampos() {
+  document.getElementById('nome').value = "";
+  document.getElementById('qtd').value = "";
+  document.getElementById('obs').value = "";
+  document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
+  perfilEscolhido = null;
+  nomePerfil = "";
+}
+function salvarLocal() {
+  localStorage.setItem('cozinha', JSON.stringify(pedidos));
+}
 
-      document.getElementById('contador').innerText = `(${clientes.length} pedido${clientes.length!==1?'s':''} — ${concluidas} concluídas)`;
-    }
+// ==============================================
+// MICROFONE — FALA E RECONHECE
+// ==============================================
+function ligarMicrofone() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert("⚠️ Use o Google Chrome para usar o microfone!");
+    return;
+  }
 
-    function alternarConcluido(id) {
-      const c = clientes.find(x => x.id === id);
-      if (c) { c.concluido = !c.concluido; renderizarLista(); gerarListaCompras(); }
-    }
-    function removerCliente(id) {
-      clientes = clientes.filter(x => x.id !== id); renderizarLista(); gerarListaCompras();
-    }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('btnMic');
+  const resp = document.getElementById('respostaVoz');
 
-    // 🛒 LISTA DE COMPRAS INTELIGENTE
-    function gerarListaCompras() {
-      const ativos = clientes.filter(c => !c.concluido);
-      if (!ativos.length) {
-        document.getElementById('listaCompras').textContent = '— Cadastre clientes para gerar a lista de insumos —';
-        return;
-      }
-      let texto = "📦 LISTA DE COMPRAS — COZINHA MULTIPERFIL\n═══════════════════════════════════\n\n";
-      ativos.forEach(c => {
-        texto += `🔹 ${c.nome} — ${c.qtd}x ${c.perfilNome.split('/')[0]}\n   ${c.cardapio}\n`;
-        if (c.restricao !== "Sem restrições especiais") texto += `   ⚠️ ${c.restricao}\n`;
-        texto += "\n";
-      });
-      texto += "═══════════════════════════════════\n✅ Total: " + ativos.reduce((s,c)=>s+c.qtd,0) + " marmitas";
-      document.getElementById('listaCompras').textContent = texto;
-    }
+  if (!reconhecimento) {
+    reconhecimento = new SR();
+    reconhecimento.lang = 'pt-BR';
 
-    function copiarLista() {
-      navigator.clipboard.writeText(document.getElementById('listaCompras').textContent);
-      alert('Lista copiada!');
-    }
-    function enviarListaWhatsApp() {
-      const texto = encodeURIComponent(document.getElementById('listaCompras').textContent);
-      window.open(`https://wa.me/?text=${texto}`, '_blank');
-    }
+    reconhecimento.onstart = () => {
+      btn.classList.add('ouvindo');
+      resp.textContent = "🔊 Ouvindo... Fale agora!";
+    };
 
-    // 🎙️ RECONHECIMENTO DE VOZ
-    function falar(texto) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(texto);
-        u.lang = 'pt-BR'; u.rate = 1.0;
-        window.speechSynthesis.speak(u);
-      }
-    }
+    reconhecimento.onresult = (evento) => {
+      const fala = evento.results[0][0].transcript.toLowerCase();
+      resp.textContent = "Você disse: " + fala;
+      interpretarComando(fala);
+    };
 
-    let ouvindo = false;
-    function alternarVoz() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('Use Chrome para comandos de voz!'); return;
-      }
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!reconhecimento) {
-        reconhecimento = new SR();
-        reconhecimento.lang = 'pt-BR';
-        reconhecimento.onstart = () => {
-          ouvindo = true;
-          document.getElementById('btnVoz').classList.add('ouvindo');
-          document.getElementById('statusVoz').textContent = '🔊 Ouvindo...';
-        };
-        reconhecimento.onresult = e => {
-          const cmd = e.results[0][0].transcript.toLowerCase();
-          document.getElementById('respostaVoz').textContent = 'Você disse: "' + cmd + '"';
-          processarComando(cmd);
-        };
-        reconhecimento.onend = pararVoz;
-      }
-      ouvindo ? reconhecimento.stop() : reconhecimento.start();
-    }
-    function pararVoz() {
-      ouvindo = false;
-      document.getElementById('btnVoz').classList.remove('ouvindo');
-      document.getElementById('statusVoz').textContent = 'Toque para falar...';
-    }
-    function processarComando(cmd) {
-      if (cmd.includes('saúde') || cmd.includes('pós-operatório')) selecionarPerfil('saude', 'Saúde');
-      else if (cmd.includes('fitness') || cmd.includes('academia')) selecionarPerfil('fit', 'Performance');
-      else if (cmd.includes('caseiro') || cmd.includes('tradicional')) selecionarPerfil('caseiro', 'Caseiro');
-      else if (cmd.includes('solteiro') || cmd.includes('rápido')) selecionarPerfil('solteiro', 'Praticidade');
-      else if (cmd.includes('gourmet') || cmd.includes('massa') || cmd.includes('queijo')) selecionarPerfil('gourmet', 'Gourmet');
-      else if (cmd.includes('cadastra') || cmd.includes('cadastrar')) cadastrarCliente();
-      else falar('Comando recebido: ' + cmd);
-    }
+    reconhecimento.onend = () => {
+      btn.classList.remove('ouvindo');
+    };
+  }
 
-    function limparFormulario() {
-      document.getElementById('nomeCliente').value = '';
-      document.getElementById('qtdMarmitas').value = '';
-      document.getElementById('restricaoCliente').value = '';
-      document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
-      perfisSelecionado = null;
-    }
+  reconhecimento.start();
+}
 
-    // Carregar dados salvos localmente
-    const salvos = localStorage.getItem('cozinhaPedidos');
-    if (salvos) { clientes = JSON.parse(salvos); renderizarLista(); gerarListaCompras(); }
-    setInterval(() => localStorage.setItem('cozinhaPedidos', JSON.stringify(clientes)), 5000);
-  </script>
+function interpretarComando(fala) {
+  if (fala.includes('saúde') || fala.includes('pós')) escolherPerfil('saude','Saúde');
+  else if (fala.includes('fit') || fala.includes('academia')) escolherPerfil('fit','Fit');
+  else if (fala.includes('caseiro') || fala.includes('tradicional')) escolherPerfil('caseiro','Caseiro');
+  else if (fala.includes('rápido') || fala.includes('solteiro')) escolherPerfil('rapido','Rápido');
+  else if (fala.includes('gourmet') || fala.includes('massa') || fala.includes('queijo')) escolherPerfil('gourmet','Gourmet');
+  else if (fala.includes('cadastrar') || fala.includes('cadastra')) cadastrar();
+  else falar("Entendi: " + fala);
+}
+
+function falar(frase) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const fala = new SpeechSynthesisUtterance(frase);
+    fala.lang = 'pt-BR';
+    fala.rate = 1.0;
+    window.speechSynthesis.speak(fala);
+  }
+}
+
+// ==============================================
+// INICIAR AO ABRIR A PÁGINA
+// ==============================================
+carregarDoBanco();
+</script>
 </body>
 </html>
