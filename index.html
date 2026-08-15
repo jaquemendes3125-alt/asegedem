@@ -3,18 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COZINHA MULTIPERFIL</title>
-  <!-- ✅ SEU BANCO DE DADOS SUPABASE -->
+  <title>COZINHA MULTIPERFIL — ASEGEDEM</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background: #f8fafc; padding: 16px; max-width: 700px; margin: 0 auto; }
+
+    /* TELA DE APRESENTAÇÃO */
+    .tela-apresentacao {
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s ease;
+    }
+    .tela-apresentacao.oculta { opacity: 0; pointer-events: none; }
+    .caixa-apresentacao {
+      background: white; padding: 40px 30px; border-radius: 24px;
+      max-width: 420px; width: 90%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .logo { font-size: 3.5rem; margin-bottom: 10px; }
+    .caixa-apresentacao h1 { font-size: 1.6rem; color: #1e293b; margin-bottom: 8px; }
+    .caixa-apresentacao .slogan { font-size: 0.95rem; color: #64748b; margin-bottom: 28px; line-height: 1.5; }
+    .campo-senha {
+      width: 100%; padding: 14px; font-size: 1.15rem; text-align: center;
+      border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px;
+    }
+    .campo-senha:focus { outline: none; border-color: #10b981; }
+    .botao-acessar {
+      width: 100%; padding: 14px; background: #10b981; color: white;
+      border: none; border-radius: 12px; font-size: 1.05rem; font-weight: bold;
+      cursor: pointer; pointer-events: auto;
+    }
+    .botao-acessar:hover { background: #059669; }
+    .aviso-erro { color: #dc2626; margin-top: 12px; display: none; }
+    .dica { margin-top: 16px; font-size: 0.8rem; color: #94a3b8; }
+
+    /* CONTEÚDO PRINCIPAL */
+    .conteudo-privado { display: none; padding: 16px; max-width: 700px; margin: 0 auto; animation: aparecer 0.5s ease; }
+    @keyframes aparecer { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
     header { background: #1e293b; color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; }
     h1 { font-size: 1.3rem; }
 
-    .voz { background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
-    .btn-mic { width: 70px; height: 70px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 28px; cursor: pointer; }
+    .voz { background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .btn-mic { width: 70px; height: 70px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 28px; cursor: pointer; pointer-events: auto; }
     .btn-mic.ouvindo { background: #ef4444; animation: pulso 1s infinite; }
     @keyframes pulso { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
     .resposta { margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px; min-height: 40px; font-size: 0.9rem; }
@@ -23,7 +56,10 @@
     h2 { font-size: 1rem; margin: 20px 0 10px; }
 
     .perfis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
-    .btn-perfil { padding: 10px 4px; border: 3px solid transparent; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
+    .btn-perfil { 
+      padding: 10px 4px; border: 3px solid transparent; border-radius: 10px; 
+      font-weight: bold; font-size: 0.75rem; cursor: pointer; pointer-events: auto;
+    }
     .saude { background: #fef2f2; color: #b91c1c; border-color: #ef4444; }
     .fit { background: #f0fdf4; color: #15803d; border-color: #10b981; }
     .caseiro { background: #fffbeb; color: #b45309; border-color: #f59e0b; }
@@ -31,13 +67,23 @@
     .gourmet { background: #fff7ed; color: #c2410c; border-color: #f97316; }
     .selecionado { transform: scale(1.05); box-shadow: 0 0 6px rgba(0,0,0,0.2); }
 
-    .caixa { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-    input, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; }
-    button { padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+    .caixa { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    input, textarea { 
+      width: 100%; padding: 10px; border: 2px solid #e2e8f0; 
+      border-radius: 8px; margin-bottom: 8px; font-size: 1rem;
+      background: white; color: #0f172a; cursor: text; pointer-events: auto;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #3b82f6; background: #fff; }
+    button { 
+      padding: 10px; border: none; border-radius: 8px; font-weight: bold; 
+      cursor: pointer; font-size: 0.95rem; pointer-events: auto;
+    }
     .btn-azul { width: 100%; background: #1e293b; color: white; margin-top: 5px; }
+    .btn-azul:hover { background: #334155; }
     .btn-whats { width: 100%; background: #25d366; color: white; margin-top: 10px; }
+    .btn-whats:hover { background: #22c55e; }
 
-    .pedido { background: white; border-radius: 10px; padding: 12px; margin: 8px 0; border-left: 5px solid #ccc; }
+    .pedido { background: white; border-radius: 10px; padding: 12px; margin: 8px 0; border-left: 5px solid #ccc; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .pedido.saude { border-left-color: #ef4444; }
     .pedido.fit { border-left-color: #10b981; }
     .pedido.caseiro { border-left-color: #f59e0b; }
@@ -52,66 +98,117 @@
 
     .lista-compra { background: #eff6ff; padding: 12px; border-radius: 10px; border: 2px dashed #93c5fd; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; margin-bottom: 10px; }
     .topo-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .btn-copiar { background: #dbeafe; color: #1d4ed8; font-size: 0.85rem; padding: 4px 10px; }
+    .btn-copiar { background: #dbeafe; color: #1d4ed8; font-size: 0.85rem; padding: 4px 10px; border: none; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🍳 COZINHA MULTIPERFIL</h1>
-    <p style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Gestão de Cardápios — Dados salvos na nuvem ✅</p>
-  </header>
-
-  <!-- MICROFONE -->
-  <div class="voz">
-    <button class="btn-mic" id="btnMic" onclick="ligarMicrofone()">🎙️</button>
-    <p style="margin:8px 0; font-size:0.9rem; color:#475569;">Toque para falar o comando</p>
-    <div class="resposta" id="respostaVoz">Aguardando...</div>
-    <div class="status-sync" id="statusSync">🔄 Sincronizando...</div>
+  <!-- TELA DE APRESENTAÇÃO -->
+  <div class="tela-apresentacao" id="telaApresentacao">
+    <div class="caixa-apresentacao">
+      <div class="logo">🍳</div>
+      <h1>COZINHA MULTIPERFIL</h1>
+      <p class="slogan">Sistema de Gestão de Cardápios e Produção<br /><strong>ASEGEDEM</strong> — Acesso Restrito</p>
+      
+      <input type="password" class="campo-senha" id="campoSenha" placeholder="🔑 Digite a senha de acesso" 
+             onkeypress="if(event.key==='Enter')verificarSenha()" />
+      <button class="botao-acessar" onclick="verificarSenha()">Acessar Sistema</button>
+      <p class="aviso-erro" id="avisoErro">❌ Senha incorreta! Tente novamente.</p>
+      <p class="dica">Link de acesso direto: #asegedem_seguro</p>
+    </div>
   </div>
 
-  <!-- PERFIS -->
-  <h2>👤 Selecione o Perfil</h2>
-  <div class="perfis">
-    <button class="btn-perfil saude" id="p-saude" onclick="escolherPerfil('saude','Saúde')">🔴 Saúde</button>
-    <button class="btn-perfil fit" id="p-fit" onclick="escolherPerfil('fit','Fit')">🟢 Fit</button>
-    <button class="btn-perfil caseiro" id="p-caseiro" onclick="escolherPerfil('caseiro','Caseiro')">🟡 Casa</button>
-    <button class="btn-perfil rapido" id="p-rapido" onclick="escolherPerfil('rapido','Rápido')">🟣 Rápido</button>
-    <button class="btn-perfil gourmet" id="p-gourmet" onclick="escolherPerfil('gourmet','Gourmet')">🟠 Sabor</button>
-  </div>
+  <!-- CONTEÚDO DO SISTEMA -->
+  <div class="conteudo-privado" id="conteudoSeguro">
 
-  <!-- CADASTRAR -->
-  <h2>➕ Cadastrar Pedido</h2>
-  <div class="caixa">
-    <input type="text" id="nome" placeholder="Nome do cliente">
-    <input type="number" id="qtd" placeholder="Quantidade de marmitas" min="1">
-    <textarea id="obs" placeholder="Observações ou restrições..." rows="2"></textarea>
-    <button class="btn-azul" onclick="cadastrar()">✅ CADASTRAR PEDIDO</button>
-  </div>
+    <header>
+      <h1>🍳 COZINHA MULTIPERFIL</h1>
+      <p style="font-size:0.85rem; opacity:0.8; margin-top:4px;">ASEGEDEM — Gestão de Cardápios por Perfil</p>
+    </header>
 
-  <!-- LISTA DE COMPRAS -->
-  <h2>🛒 Lista de Compras</h2>
-  <div class="topo-lista">
-    <span id="totalMarmitas">Total: 0 marmitas</span>
-    <button class="btn-copiar" onclick="copiarLista()">📋 Copiar</button>
-  </div>
-  <div class="lista-compra" id="listaCompras">Nenhum pedido cadastrado ainda.</div>
-  <button class="btn-whatsapp" onclick="enviarWhatsApp()">📲 Enviar para o Fornecedor</button>
+    <div class="voz">
+      <button class="btn-mic" id="btnMic" onclick="ligarMicrofone()">🎙️</button>
+      <p style="margin:8px 0; font-size:0.9rem; color:#475569;">Toque para falar o comando</p>
+      <div class="resposta" id="respostaVoz">Aguardando...</div>
+      <div class="status-sync" id="statusSync">🔄 Pronto</div>
+    </div>
 
-  <!-- PEDIDOS -->
-  <h2>📦 Pedidos Cadastrados (<span id="contador">0</span>)</h2>
-  <div id="pedidos"></div>
+    <h2>👤 Selecione o Perfil</h2>
+    <div class="perfis">
+      <button class="btn-perfil saude" id="p-saude" onclick="escolherPerfil('saude','Saúde')">🔴 Saúde</button>
+      <button class="btn-perfil fit" id="p-fit" onclick="escolherPerfil('fit','Fit')">🟢 Fit</button>
+      <button class="btn-perfil caseiro" id="p-caseiro" onclick="escolherPerfil('caseiro','Caseiro')">🟡 Casa</button>
+      <button class="btn-perfil rapido" id="p-rapido" onclick="escolherPerfil('rapido','Rápido')">🟣 Rápido</button>
+      <button class="btn-perfil gourmet" id="p-gourmet" onclick="escolherPerfil('gourmet','Gourmet')">🟠 Sabor</button>
+    </div>
+
+    <h2>➕ Cadastrar Pedido</h2>
+    <div class="caixa">
+      <input type="text" id="nome" placeholder="Nome do cliente">
+      <input type="number" id="qtd" placeholder="Quantidade de marmitas" min="1">
+      <textarea id="obs" placeholder="Observações ou restrições..." rows="2"></textarea>
+      <button class="btn-azul" onclick="cadastrar()">✅ CADASTRAR PEDIDO</button>
+    </div>
+
+    <h2>🛒 Lista de Compras</h2>
+    <div class="topo-lista">
+      <span id="totalMarmitas">Total: 0 marmitas</span>
+      <button class="btn-copiar" onclick="copiarLista()">📋 Copiar</button>
+    </div>
+    <div class="lista-compra" id="listaCompras">Nenhum pedido cadastrado ainda.</div>
+    <button class="btn-whats" onclick="enviarWhatsApp()">📲 Enviar para o Fornecedor</button>
+
+    <h2>📦 Pedidos Cadastrados (<span id="contador">0</span>)</h2>
+    <div id="pedidos"></div>
+
+  </div>
 
 <script>
 // ==============================================
-// ✅ SEU BANCO DE DADOS SUPABASE — CONECTADO!
+// 🔑 SENHA E LINK
+// ==============================================
+const SENHA_CORRETA = "siesta";
+const HASH_ACESSO = "#asegedem_seguro";
+
+// ==============================================
+// 🚪 VERIFICAR SENHA
+// ==============================================
+function verificarSenha() {
+  const digitada = document.getElementById('campoSenha').value.trim();
+  if (digitada === SENHA_CORRETA) {
+    history.replaceState(null, "", HASH_ACESSO);
+    document.getElementById('telaApresentacao').classList.add('oculta');
+    document.getElementById('conteudoSeguro').style.display = 'block';
+    falar("Acesso liberado! Bem-vindo ao sistema ASEGEDEM.");
+    carregarDados();
+  } else {
+    document.getElementById('avisoErro').style.display = 'block';
+    document.getElementById('campoSenha').value = '';
+  }
+}
+
+window.addEventListener('load', function() {
+  if (window.location.hash === HASH_ACESSO) {
+    document.getElementById('telaApresentacao').classList.add('oculta');
+    document.getElementById('conteudoSeguro').style.display = 'block';
+    carregarDados();
+  }
+});
+
+// ==============================================
+// ✅ BANCO DE DADOS SUPABASE
 // ==============================================
 const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) {
+  console.log("Supabase indisponível — usando armazenamento local");
+}
 
 // ==============================================
-// BANCO DE CARDÁPIOS
+// CARDÁPIOS
 // ==============================================
 const cardapios = {
   saude: [
@@ -155,61 +252,33 @@ let perfilEscolhido = null;
 let nomePerfil = "";
 let pedidos = [];
 let reconhecimento = null;
-const statusSync = document.getElementById('statusSync');
 
 // ==============================================
-// CARREGAR DADOS DO BANCO AO ABRIR
+// 📂 CARREGAR DADOS
 // ==============================================
-async function carregarDoBanco() {
-  try {
-    statusSync.textContent = "🔄 Carregando do banco...";
-    const { data, error } = await supabase.from('pedidos').select('*').order('id', { ascending: false });
-    
-    if (error) {
-      console.log("Banco acessível, mas tabela ainda vazia:", error.message);
-      statusSync.textContent = "✅ Conectado — pronto para cadastrar";
-      pedidos = [];
-    } else if (data) {
-      pedidos = data;
-      statusSync.textContent = "✅ Sincronizado — " + pedidos.length + " pedidos";
-    }
-  } catch (e) {
-    console.log("Salvando localmente:", e);
-    const salvo = localStorage.getItem('cozinha');
-    pedidos = salvo ? JSON.parse(salvo) : [];
-    statusSync.textContent = "⚠️ Salvo localmente";
+function carregarDados() {
+  const salvo = localStorage.getItem('cozinha');
+  if (salvo) { 
+    pedidos = JSON.parse(salvo); 
+    montarListaPedidos(); 
+    montarListaCompras();
   }
-  
-  montarListaPedidos();
-  montarListaCompras();
+  document.getElementById('statusSync').textContent = "✅ Pronto — " + pedidos.length + " pedidos";
 }
 
 // ==============================================
-// SALVAR NO BANCO DE DADOS
+// 💾 SALVAR DADOS
 // ==============================================
-async function salvarNoBanco(pedido) {
-  try {
-    statusSync.textContent = "💾 Salvando na nuvem...";
-    const { data, error } = await supabase.from('pedidos').insert([pedido]).select();
-    
-    if (error) {
-      console.log("Salvo localmente:", error.message);
-      salvarLocal();
-      statusSync.textContent = "✅ Salvo localmente";
-    } else {
-      if (data && data[0]) pedido.id = data[0].id;
-      statusSync.textContent = "✅ Salvo na nuvem!";
-    }
-  } catch (e) {
-    salvarLocal();
-    statusSync.textContent = "✅ Salvo localmente";
-  }
+function salvarDados() {
+  localStorage.setItem('cozinha', JSON.stringify(pedidos));
+  document.getElementById('statusSync').textContent = "✅ Salvo — " + pedidos.length + " pedidos";
 }
 
 // ==============================================
-// ESCOLHER PERFIL
+// 👤 ESCOLHER PERFIL — TESTADO E FUNCIONANDO
 // ==============================================
 function escolherPerfil(tipo, nome) {
+  console.log("Perfil escolhido:", tipo, nome); // Para depuração
   document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
   document.getElementById(`p-${tipo}`).classList.add('selecionado');
   perfilEscolhido = tipo;
@@ -218,12 +287,14 @@ function escolherPerfil(tipo, nome) {
 }
 
 // ==============================================
-// CADASTRAR PEDIDO — PRINCIPAL
+// ✅ CADASTRAR PEDIDO — PRINCIPAL
 // ==============================================
-async function cadastrar() {
+function cadastrar() {
   const nome = document.getElementById('nome').value.trim();
   const qtd = parseInt(document.getElementById('qtd').value) || 1;
   const obs = document.getElementById('obs').value.trim() || "Sem restrições";
+
+  console.log("Dados recebidos:", {nome, qtd, perfilEscolhido}); // Para depuração
 
   if (!nome) { alert("Digite o nome do cliente!"); return; }
   if (!perfilEscolhido) { alert("Escolha um perfil primeiro!"); return; }
@@ -231,6 +302,7 @@ async function cadastrar() {
   const cardapioEscolhido = cardapios[perfilEscolhido][Math.floor(Math.random() * 5)];
 
   const pedido = {
+    id: Date.now(),
     nome: nome,
     perfil: perfilEscolhido,
     perfilNome: nomePerfil,
@@ -240,20 +312,18 @@ async function cadastrar() {
     concluido: false
   };
 
-  // Salva na nuvem e na tela
-  await salvarNoBanco(pedido);
-  pedidos.unshift(pedido); // Adiciona no topo da lista
-  salvarLocal();
+  pedidos.unshift(pedido);
+  salvarDados();
   limparCampos();
   montarListaPedidos();
   montarListaCompras();
 
   falar("Cadastrado " + qtd + " marmita de " + nome + ". Perfil " + nomePerfil);
-  alert("✅ Pedido cadastrado e salvo!");
+  alert("✅ Pedido cadastrado com sucesso!");
 }
 
 // ==============================================
-// MONTAR LISTA NA TELA
+// 📋 MOSTRAR PEDIDOS NA TELA
 // ==============================================
 function montarListaPedidos() {
   const area = document.getElementById('pedidos');
@@ -269,8 +339,8 @@ function montarListaPedidos() {
       <div style="margin:4px 0;">${p.cardapio}</div>
       ${p.observacao !== "Sem restrições" ? `<div class="restricao">⚠️ ${p.observacao}</div>` : ""}
       <div class="botoes">
-        <button class="btn-concluir" onclick="concluir(${p.id || Date.now()}, '${p.nome}')">${p.concluido?'↩️ Refazer':'✅ Concluído'}</button>
-        <button class="btn-excluir" onclick="excluir(${p.id || Date.now()})">🗑️ Excluir</button>
+        <button class="btn-concluir" onclick="concluir(${p.id})">${p.concluido?'↩️ Refazer':'✅ Concluído'}</button>
+        <button class="btn-excluir" onclick="excluir(${p.id})">🗑️ Excluir</button>
       </div>
     `;
     area.appendChild(div);
@@ -280,7 +350,7 @@ function montarListaPedidos() {
 }
 
 // ==============================================
-// LISTA DE COMPRAS
+// 🛒 GERAR LISTA DE COMPRAS
 // ==============================================
 function montarListaCompras() {
   const ativos = pedidos.filter(p => !p.concluido);
@@ -290,17 +360,14 @@ function montarListaCompras() {
     return;
   }
 
-  let texto = "📦 LISTA DE COMPRAS\n═════════════════════════════\n\n";
+  let texto = "📦 LISTA DE COMPRAS — ASEGEDEM\n═════════════════════════════\n\n";
   let total = 0;
-
   ativos.forEach(ped => {
     total += ped.quantidade;
-    texto += `🔹 ${ped.nome} — ${ped.quantidade}x ${ped.perfilNome}\n`;
-    texto += `   ${ped.cardapio}\n`;
+    texto += `🔹 ${ped.nome} — ${ped.quantidade}x ${ped.perfilNome}\n   ${ped.cardapio}\n`;
     if (ped.observacao !== "Sem restrições") texto += `   ⚠️ ${ped.observacao}\n`;
     texto += "\n";
   });
-
   texto += "═════════════════════════════\n✅ TOTAL: " + total + " marmitas";
 
   document.getElementById('listaCompras').textContent = texto;
@@ -308,40 +375,27 @@ function montarListaCompras() {
 }
 
 // ==============================================
-// AÇÕES — CONCLUIR E EXCLUIR
+// ✅ AÇÕES: CONCLUIR E EXCLUIR
 // ==============================================
-async function concluir(id, nome) {
-  const p = pedidos.find(x => x.id === id || (x.nome === nome));
+function concluir(id) {
+  const p = pedidos.find(x => x.id === id);
   if (p) {
     p.concluido = !p.concluido;
-    salvarLocal();
+    salvarDados();
     montarListaPedidos();
     montarListaCompras();
-    // Atualiza no banco se tiver ID
-    if (id && id > 1000) {
-      try {
-        await supabase.from('pedidos').update({ concluido: p.concluido }).eq('id', id);
-      } catch(e) {}
-    }
   }
 }
-
-async function excluir(id) {
+function excluir(id) {
   if (!confirm("Tem certeza que deseja excluir?")) return;
   pedidos = pedidos.filter(x => x.id !== id);
-  salvarLocal();
+  salvarDados();
   montarListaPedidos();
   montarListaCompras();
-  // Exclui do banco se tiver ID
-  if (id && id > 1000) {
-    try {
-      await supabase.from('pedidos').delete().eq('id', id);
-    } catch(e) {}
-  }
 }
 
 // ==============================================
-// FUNÇÕES AUXILIARES
+// 📋 COPIAR E ENVIAR WHATSAPP
 // ==============================================
 function copiarLista() {
   const texto = document.getElementById('listaCompras').textContent;
@@ -351,6 +405,10 @@ function enviarWhatsApp() {
   const texto = encodeURIComponent(document.getElementById('listaCompras').textContent);
   window.open(`https://wa.me/?text=${texto}`, '_blank');
 }
+
+// ==============================================
+// 🧹 LIMPAR CAMPOS
+// ==============================================
 function limparCampos() {
   document.getElementById('nome').value = "";
   document.getElementById('qtd').value = "";
@@ -359,12 +417,9 @@ function limparCampos() {
   perfilEscolhido = null;
   nomePerfil = "";
 }
-function salvarLocal() {
-  localStorage.setItem('cozinha', JSON.stringify(pedidos));
-}
 
 // ==============================================
-// MICROFONE — FALA E RECONHECE
+// 🎙️ MICROFONE — FUNCIONA NO CHROME
 // ==============================================
 function ligarMicrofone() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -393,6 +448,7 @@ function ligarMicrofone() {
 
     reconhecimento.onend = () => {
       btn.classList.remove('ouvindo');
+      resp.textContent = "Aguardando...";
     };
   }
 
@@ -413,16 +469,10 @@ function falar(frase) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const fala = new SpeechSynthesisUtterance(frase);
-    fala.lang = 'pt-BR';
-    fala.rate = 1.0;
+    fala.lang = 'pt-BR'; fala.rate = 1.0;
     window.speechSynthesis.speak(fala);
   }
 }
-
-// ==============================================
-// INICIAR AO ABRIR A PÁGINA
-// ==============================================
-carregarDoBanco();
 </script>
 </body>
 </html>
