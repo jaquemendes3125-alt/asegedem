@@ -8,7 +8,9 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
 
-    /* TELA DE APRESENTAÇÃO */
+    /* ==============================================
+       🖥️ TELA DE APRESENTAÇÃO — APARECE PRIMEIRO
+       ============================================== */
     .tela-apresentacao {
       position: fixed; inset: 0;
       background: linear-gradient(135deg, #1e293b, #0f172a);
@@ -18,29 +20,21 @@
     }
     .tela-apresentacao.oculta { opacity: 0; pointer-events: none; }
     .caixa-apresentacao {
-      background: white; padding: 40px 30px; border-radius: 24px;
-      max-width: 420px; width: 90%; text-align: center;
+      background: white; padding: 50px 30px; border-radius: 24px;
+      max-width: 450px; width: 90%; text-align: center;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
-    .logo { font-size: 3.5rem; margin-bottom: 10px; }
-    .caixa-apresentacao h1 { font-size: 1.6rem; color: #1e293b; margin-bottom: 8px; }
-    .caixa-apresentacao .slogan { font-size: 0.95rem; color: #64748b; margin-bottom: 28px; line-height: 1.5; }
-    .campo-senha {
-      width: 100%; padding: 14px; font-size: 1.15rem; text-align: center;
-      border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px;
-    }
-    .campo-senha:focus { outline: none; border-color: #10b981; }
-    .botao-acessar {
-      width: 100%; padding: 14px; background: #10b981; color: white;
-      border: none; border-radius: 12px; font-size: 1.05rem; font-weight: bold;
-      cursor: pointer; pointer-events: auto;
-    }
-    .botao-acessar:hover { background: #059669; }
-    .aviso-erro { color: #dc2626; margin-top: 12px; display: none; }
-    .dica { margin-top: 16px; font-size: 0.8rem; color: #94a3b8; }
+    .logo { font-size: 4rem; margin-bottom: 15px; }
+    .caixa-apresentacao h1 { font-size: 1.8rem; color: #1e293b; margin-bottom: 10px; }
+    .caixa-apresentacao .slogan { font-size: 1rem; color: #64748b; margin-bottom: 15px; line-height: 1.6; }
+    .nome-sistema { font-size: 2.2rem; font-weight: bold; color: #10b981; margin: 15px 0; letter-spacing: 4px; }
+    .aviso { margin-top: 25px; padding: 12px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; color: #475569; }
+    .codigo { font-weight: bold; color: #1e293b; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 5px; }
 
-    /* CONTEÚDO PRINCIPAL */
-    .conteudo-privado { display: none; padding: 16px; max-width: 700px; margin: 0 auto; animation: aparecer 0.5s ease; }
+    /* ==============================================
+       📱 CONTEÚDO DO SISTEMA — SÓ COM #asegedem
+       ============================================== */
+    .conteudo-sistema { display: none; padding: 16px; max-width: 700px; margin: 0 auto; animation: aparecer 0.5s ease; }
     @keyframes aparecer { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
     header { background: #1e293b; color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; }
@@ -103,34 +97,38 @@
 </head>
 <body>
 
-  <!-- TELA DE APRESENTAÇÃO -->
+  <!-- ==============================================
+       🖥️ TELA DE APRESENTAÇÃO — APARECE SEMPRE
+       ============================================== -->
   <div class="tela-apresentacao" id="telaApresentacao">
     <div class="caixa-apresentacao">
       <div class="logo">🍳</div>
       <h1>COZINHA MULTIPERFIL</h1>
-      <p class="slogan">Sistema de Gestão de Cardápios e Produção<br /><strong>ASEGEDEM</strong> — Acesso Restrito</p>
-      
-      <input type="password" class="campo-senha" id="campoSenha" placeholder="🔑 Digite a senha de acesso" 
-             onkeypress="if(event.key==='Enter')verificarSenha()" />
-      <button class="botao-acessar" onclick="verificarSenha()">Acessar Sistema</button>
-      <p class="aviso-erro" id="avisoErro">❌ Senha incorreta! Tente novamente.</p>
-      <p class="dica">Link de acesso direto: #asegedem_seguro</p>
+      <p class="slogan">Sistema de Gestão de Cardápios e Produção</p>
+      <div class="nome-sistema">ASEGEDEM</div>
+      <p class="slogan">Solução inteligente para organização de produção e pedidos</p>
+      <div class="aviso">
+        Acesso restrito.<br>
+        Adicione ao final do endereço: <span class="codigo">senha</span>
+      </div>
     </div>
   </div>
 
-  <!-- CONTEÚDO DO SISTEMA -->
-  <div class="conteudo-privado" id="conteudoSeguro">
+  <!-- ==============================================
+       📱 SISTEMA — SÓ APARECE COM #asegedem
+       ============================================== -->
+  <div class="conteudo-sistema" id="sistema">
 
     <header>
-      <h1>🍳 COZINHA MULTIPERFIL</h1>
-      <p style="font-size:0.85rem; opacity:0.8; margin-top:4px;">ASEGEDEM — Gestão de Cardápios por Perfil</p>
+      <h1>🍳 COZINHA MULTIPERFIL — ASEGEDEM</h1>
+      <p style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Gestão de Cardápios por Perfil</p>
     </header>
 
     <div class="voz">
       <button class="btn-mic" id="btnMic" onclick="ligarMicrofone()">🎙️</button>
       <p style="margin:8px 0; font-size:0.9rem; color:#475569;">Toque para falar o comando</p>
       <div class="resposta" id="respostaVoz">Aguardando...</div>
-      <div class="status-sync" id="statusSync">🔄 Pronto</div>
+      <div class="status-sync" id="statusSync">✅ Pronto</div>
     </div>
 
     <h2>👤 Selecione o Perfil</h2>
@@ -165,34 +163,18 @@
 
 <script>
 // ==============================================
-// 🔑 SENHA E LINK
+// 🔑 ACESSO POR LINK — SEM SENHA
 // ==============================================
-const SENHA_CORRETA = "siesta";
-const HASH_ACESSO = "#asegedem_seguro";
-
-// ==============================================
-// 🚪 VERIFICAR SENHA
-// ==============================================
-function verificarSenha() {
-  const digitada = document.getElementById('campoSenha').value.trim();
-  if (digitada === SENHA_CORRETA) {
-    history.replaceState(null, "", HASH_ACESSO);
-    document.getElementById('telaApresentacao').classList.add('oculta');
-    document.getElementById('conteudoSeguro').style.display = 'block';
-    falar("Acesso liberado! Bem-vindo ao sistema ASEGEDEM.");
-    carregarDados();
-  } else {
-    document.getElementById('avisoErro').style.display = 'block';
-    document.getElementById('campoSenha').value = '';
-  }
-}
+const HASH_ACESSO = "#asegedem";
 
 window.addEventListener('load', function() {
   if (window.location.hash === HASH_ACESSO) {
+    // Abre o sistema
     document.getElementById('telaApresentacao').classList.add('oculta');
-    document.getElementById('conteudoSeguro').style.display = 'block';
+    document.getElementById('sistema').style.display = 'block';
     carregarDados();
   }
+  // Se não tiver o #asegedem, fica só na apresentação
 });
 
 // ==============================================
@@ -275,10 +257,9 @@ function salvarDados() {
 }
 
 // ==============================================
-// 👤 ESCOLHER PERFIL — TESTADO E FUNCIONANDO
+// 👤 ESCOLHER PERFIL
 // ==============================================
 function escolherPerfil(tipo, nome) {
-  console.log("Perfil escolhido:", tipo, nome); // Para depuração
   document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
   document.getElementById(`p-${tipo}`).classList.add('selecionado');
   perfilEscolhido = tipo;
@@ -287,14 +268,12 @@ function escolherPerfil(tipo, nome) {
 }
 
 // ==============================================
-// ✅ CADASTRAR PEDIDO — PRINCIPAL
+// ✅ CADASTRAR PEDIDO
 // ==============================================
 function cadastrar() {
   const nome = document.getElementById('nome').value.trim();
   const qtd = parseInt(document.getElementById('qtd').value) || 1;
   const obs = document.getElementById('obs').value.trim() || "Sem restrições";
-
-  console.log("Dados recebidos:", {nome, qtd, perfilEscolhido}); // Para depuração
 
   if (!nome) { alert("Digite o nome do cliente!"); return; }
   if (!perfilEscolhido) { alert("Escolha um perfil primeiro!"); return; }
@@ -323,7 +302,7 @@ function cadastrar() {
 }
 
 // ==============================================
-// 📋 MOSTRAR PEDIDOS NA TELA
+// 📋 MOSTRAR PEDIDOS
 // ==============================================
 function montarListaPedidos() {
   const area = document.getElementById('pedidos');
@@ -350,7 +329,7 @@ function montarListaPedidos() {
 }
 
 // ==============================================
-// 🛒 GERAR LISTA DE COMPRAS
+// 🛒 LISTA DE COMPRAS
 // ==============================================
 function montarListaCompras() {
   const ativos = pedidos.filter(p => !p.concluido);
@@ -375,7 +354,7 @@ function montarListaCompras() {
 }
 
 // ==============================================
-// ✅ AÇÕES: CONCLUIR E EXCLUIR
+// ✅ CONCLUIR E EXCLUIR
 // ==============================================
 function concluir(id) {
   const p = pedidos.find(x => x.id === id);
@@ -387,7 +366,7 @@ function concluir(id) {
   }
 }
 function excluir(id) {
-  if (!confirm("Tem certeza que deseja excluir?")) return;
+  if (!confirm("Tem certeza?")) return;
   pedidos = pedidos.filter(x => x.id !== id);
   salvarDados();
   montarListaPedidos();
@@ -395,7 +374,7 @@ function excluir(id) {
 }
 
 // ==============================================
-// 📋 COPIAR E ENVIAR WHATSAPP
+// 📋 COPIAR E WHATSAPP
 // ==============================================
 function copiarLista() {
   const texto = document.getElementById('listaCompras').textContent;
@@ -419,11 +398,11 @@ function limparCampos() {
 }
 
 // ==============================================
-// 🎙️ MICROFONE — FUNCIONA NO CHROME
+// 🎙️ MICROFONE
 // ==============================================
 function ligarMicrofone() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    alert("⚠️ Use o Google Chrome para usar o microfone!");
+    alert("⚠️ Use o Google Chrome para o microfone!");
     return;
   }
 
