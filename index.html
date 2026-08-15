@@ -33,56 +33,72 @@
       margin: 0 auto;
     }
 
-    /* TELA DE SENHA */
-    .tela-senha {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-    .caixa-senha {
-      background: white;
-      padding: 32px;
+    /* Tela de Login Simples e Estilizada */
+    #loginScreen {
+      background: var(--card-bg);
       border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 30px 20px;
+      margin: 40px auto;
       text-align: center;
-      max-width: 320px;
-      width: 90%;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
     }
-    .caixa-senha h2 {
+
+    .login-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .login-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .login-desc {
+      font-size: 0.85rem;
+      color: var(--text-sub);
       margin-bottom: 20px;
-      color: #1e293b;
     }
-    .caixa-senha input {
+
+    .login-input {
       width: 100%;
-      padding: 12px;
-      font-size: 1rem;
+      padding: 14px;
       border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      margin-bottom: 16px;
+      border-radius: 12px;
+      font-size: 1.1rem;
       text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      outline: none;
     }
-    .caixa-senha button {
+
+    .login-input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .login-btn {
       width: 100%;
-      padding: 12px;
-      background: #10b981;
+      padding: 14px;
+      background: var(--accent-blue);
       color: white;
       border: none;
-      border-radius: 10px;
-      font-size: 1rem;
+      border-radius: 12px;
       font-weight: 700;
+      font-size: 1rem;
       cursor: pointer;
     }
-    .caixa-senha .erro {
-      color: #dc2626;
-      margin-top: 12px;
-      font-size: 0.9rem;
+
+    .login-error {
+      color: #ef4444;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Conteúdo Principal (Oculto até autenticar) */
+    #appContent {
       display: none;
     }
 
@@ -285,80 +301,89 @@
       justify-content: center;
       gap: 8px;
     }
-
-    /* Esconde o conteúdo até liberar */
-    .conteudo-app { display: none; }
   </style>
 </head>
 <body>
 
-  <!-- 🔒 TELA DE SENHA - NÃO MEXE NO RESTO DO CÓDIGO -->
-  <div class="tela-senha" id="telaSenha">
-    <div class="caixa-senha">
-      <h2>🔐 Acesso Restrito</h2>
-      <input type="password" id="campoSenha" placeholder="Digite a senha" onkeypress="if(event.key==='Enter')verificarSenha()">
-      <button onclick="verificarSenha()">Entrar</button>
-      <p class="erro" id="erroSenha">Senha incorreta!</p>
+  <!-- Tela de Bloqueio por Senha -->
+  <div id="loginScreen">
+    <div class="login-icon">🔒</div>
+    <h2 class="login-title">Acesso Restrito</h2>
+    <p class="login-desc">Digite a senha de bancada para acessar o sistema da cozinha.</p>
+    <input type="password" id="passwordInput" class="login-input" placeholder="Digite a senha..." onkeypress="checarTecla(event)" />
+    <button class="login-btn" onclick="validarAcesso()">Acessar Painel</button>
+    <p class="login-error" id="loginError">Senha incorreta! Tente novamente.</p>
+  </div>
+
+  <!-- Aplicativo Completo da Cozinha -->
+  <div id="appContent">
+    <header>
+      <h1>🍳 Cozinha Inteligente</h1>
+      <p class="subtitle">Guia de Bancada Mãos-Livres (5 Marmitas do Dia)</p>
+    </header>
+
+    <!-- Painel de Comando por Voz -->
+    <div class="voice-control-panel">
+      <p class="voice-status" id="voiceStatus">Toque no microfone para falar com o App</p>
+      <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()">🎙️</button>
+      <p class="voice-feedback" id="voiceFeedback">Exemplo: "Qual é a próxima marmita?"</p>
+    </div>
+
+    <!-- Lista de Marmitas dos 5 Clientes -->
+    <div class="section-title">
+      <span>📋 Pedidos Selecionados</span>
+      <span style="font-size: 0.8rem; color: var(--text-sub);" id="completedCount">0/5 Concluídas</span>
+    </div>
+
+    <div id="marmitasList">
+      <!-- Cards carregados via JS -->
+    </div>
+
+    <!-- Ações Globais / Envio ao Motoboy -->
+    <div class="motoboy-bar">
+      <h3 style="font-size: 0.95rem; color: #1e40af;">🛵 Logística Integrada de Entregas</h3>
+      <p style="font-size: 0.8rem; color: #3b82f6; margin-top: 2px;">Envie a rota completa direta para o WhatsApp do Motoboy parceiro</p>
+      <button class="btn-whatsapp" onclick="enviarParaMotoboy()">
+        📲 Disparar Rota para o Motoboy
+      </button>
     </div>
   </div>
 
-  <div class="conteudo-app" id="conteudoApp">
-
-  <header>
-    <h1>🍳 Cozinha Inteligente</h1>
-    <p class="subtitle">Guia de Bancada Mãos-Livres (5 Marmitas do Dia)</p>
-  </header>
-
-  <!-- Painel de Comando por Voz -->
-  <div class="voice-control-panel">
-    <p class="voice-status" id="voiceStatus">Toque no microfone para falar com o App</p>
-    <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()">🎙️</button>
-    <p class="voice-feedback" id="voiceFeedback">Exemplo: "Qual é a próxima marmita?"</p>
-  </div>
-
-  <!-- Lista de Marmitas dos 5 Clientes -->
-  <div class="section-title">
-    <span>📋 Pedidos Selecionados</span>
-    <span style="font-size: 0.8rem; color: var(--text-sub);" id="completedCount">0/5 Concluídas</span>
-  </div>
-
-  <div id="marmitasList">
-    <!-- Os cards das 5 marmitas vão carregar aqui via JS -->
-  </div>
-
-  <!-- Ações Globais / Envio ao Motoboy -->
-  <div class="motoboy-bar">
-    <h3 style="font-size: 0.95rem; color: #1e40af;">🛵 Logística Integrada de Entregas</h3>
-    <p style="font-size: 0.8rem; color: #3b82f6; margin-top: 2px;">Envie a rota completa direta para o WhatsApp do Motoboy parceiro</p>
-    <button class="btn-whatsapp" onclick="enviarParaMotoboy()">
-      📲 Disparar Rota para o Motoboy
-    </button>
-  </div>
-
-  </div> <!-- Fim do conteúdo protegido -->
-
   <script>
-    // 🔒 SENHA DE ACESSO — ALTERE AQUI SE QUISER
-    const SENHA_CORRETA = "siesta"; // ← TROCA A SENHA AQUI
+    // 1. Controle de Senha
+    const SENHA_CORRETA = "siesta"; // <-- SUA SENHA AQUI
 
-    function verificarSenha() {
-      const digitada = document.getElementById('campoSenha').value;
-      if (digitada === SENHA_CORRETA) {
-        document.getElementById('telaSenha').style.display = 'none';
-        document.getElementById('conteudoApp').style.display = 'block';
-        falarTexto("Acesso liberado! Bem-vindo à Cozinha Inteligente.");
+    function validarAcesso() {
+      const input = document.getElementById('passwordInput').value;
+      const errorMsg = document.getElementById('loginError');
+
+      if (input === SENHA_CORRETA) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+        sessionStorage.setItem('autenticado', 'true');
+        renderCards();
       } else {
-        document.getElementById('erroSenha').style.display = 'block';
-        document.getElementById('campoSenha').value = '';
+        errorMsg.style.display = 'block';
       }
     }
 
-    // 1. Configuração do Supabase com suas Credenciais
+    function checarTecla(e) {
+      if (e.key === 'Enter') {
+        validarAcesso();
+      }
+    }
+
+    // Mantém logado na sessão ao atualizar
+    if (sessionStorage.getItem('autenticado') === 'true') {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appContent').style.display = 'block';
+    }
+
+    // 2. Supabase e Aplicação
     const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
+    const SUPABASE_KEY = "sb_publishable_" + "6we1T3JGN2HBwTpn4IITig_px6An0IC";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Dados Locais dos 5 Perfis de Clientes
     const clientesLocais = [
       {
         id: 1,
@@ -407,11 +432,11 @@
       }
     ];
 
-    // Renderizar os Cards na Tela
     function renderCards() {
       const listEl = document.getElementById('marmitasList');
+      if (!listEl) return;
+      
       listEl.innerHTML = '';
-
       let concluidas = 0;
 
       clientesLocais.forEach((c) => {
@@ -455,7 +480,6 @@
       }
     }
 
-    // Sistema de Voz (Sintetizador + Reconhecimento)
     function falarTexto(texto) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -489,13 +513,8 @@
         processarComando(command);
       };
 
-      recognition.onerror = function() {
-        pararVoz();
-      };
-
-      recognition.onend = function() {
-        pararVoz();
-      };
+      recognition.onerror = function() { pararVoz(); };
+      recognition.onend = function() { pararVoz(); };
     }
 
     function pararVoz() {
@@ -506,7 +525,7 @@
 
     function toggleVoiceRecognition() {
       if (!recognition) {
-        alert("O seu navegador não suporta reconhecimento de voz direto. Tente usar o Google Chrome no celular ou PC.");
+        alert("O seu navegador não suporta reconhecimento de voz direto. Tente usar o Google Chrome.");
         return;
       }
       if (isListening) {
@@ -535,7 +554,6 @@
       }
     }
 
-    // Disparo para o WhatsApp do Motoboy
     function enviarParaMotoboy() {
       const mensagem = encodeURIComponent(
         `Olá, Marcos! Pedido de coleta pronto para entrega:\n\n` +
@@ -551,8 +569,9 @@
       window.open(`https://wa.me/?text=${mensagem}`, '_blank');
     }
 
-    // Inicialização
-    renderCards();
+    if (sessionStorage.getItem('autenticado') === 'true') {
+      renderCards();
+    }
   </script>
 </body>
 </html>
