@@ -8,9 +8,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
 
-    /* ==============================================
-       🖥️ TELA DE APRESENTAÇÃO — APARECE PRIMEIRO
-       ============================================== */
+    /* TELA DE APRESENTAÇÃO */
     .tela-apresentacao {
       position: fixed; inset: 0;
       background: linear-gradient(135deg, #1e293b, #0f172a);
@@ -31,9 +29,7 @@
     .aviso { margin-top: 25px; padding: 12px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; color: #475569; }
     .codigo { font-weight: bold; color: #1e293b; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 5px; }
 
-    /* ==============================================
-       📱 CONTEÚDO DO SISTEMA — SÓ COM #asegedem
-       ============================================== */
+    /* CONTEÚDO DO SISTEMA */
     .conteudo-sistema { display: none; padding: 16px; max-width: 700px; margin: 0 auto; animation: aparecer 0.5s ease; }
     @keyframes aparecer { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -97,9 +93,7 @@
 </head>
 <body>
 
-  <!-- ==============================================
-       🖥️ TELA DE APRESENTAÇÃO — APARECE SEMPRE
-       ============================================== -->
+  <!-- TELA DE APRESENTAÇÃO -->
   <div class="tela-apresentacao" id="telaApresentacao">
     <div class="caixa-apresentacao">
       <div class="logo">🍳</div>
@@ -109,14 +103,12 @@
       <p class="slogan">Solução inteligente para organização de produção e pedidos</p>
       <div class="aviso">
         Acesso restrito.<br>
-        Adicione ao final do endereço: <span class="codigo">senha</span>
+        Adicione ao final do endereço: 
       </div>
     </div>
   </div>
 
-  <!-- ==============================================
-       📱 SISTEMA — SÓ APARECE COM #asegedem
-       ============================================== -->
+  <!-- SISTEMA -->
   <div class="conteudo-sistema" id="sistema">
 
     <header>
@@ -163,18 +155,16 @@
 
 <script>
 // ==============================================
-// 🔑 ACESSO POR LINK — SEM SENHA
+// 🔑 ACESSO POR LINK — AGORA CERTO: #ASEGEDEM
 // ==============================================
-const HASH_ACESSO = "#asegedem";
+const HASH_ACESSO = "#ASEGEDEM";
 
 window.addEventListener('load', function() {
-  if (window.location.hash === HASH_ACESSO) {
-    // Abre o sistema
+  if (window.location.hash.toUpperCase() === "#ASEGEDEM") {
     document.getElementById('telaApresentacao').classList.add('oculta');
     document.getElementById('sistema').style.display = 'block';
     carregarDados();
   }
-  // Se não tiver o #asegedem, fica só na apresentação
 });
 
 // ==============================================
