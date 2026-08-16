@@ -3,125 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COZINHA MULTIPERFIL — ASEGEDEM</title>
+  <title>ASEGEDEM</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
 
-    /* TELA DE APRESENTAÇÃO */
     .tela-apresentacao {
-      position: fixed; inset: 0;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100;
-      transition: opacity 0.5s ease;
+      position:fixed; inset:0;
+      background:linear-gradient(135deg, #1e293b, #0f172a);
+      display:flex; align-items:center; justify-content:center;
+      z-index:100; transition:opacity .5s ease;
     }
-    .tela-apresentacao.oculta { opacity: 0; pointer-events: none; }
-    .caixa-apresentacao {
-      background: white; padding: 50px 30px; border-radius: 24px;
-      max-width: 450px; width: 90%; text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    .tela-apresentacao.oculta { opacity:0; pointer-events:none; }
+    .caixa {
+      background:#fff; padding:50px 30px; border-radius:24px;
+      max-width:450px; width:90%; text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
     }
-    .logo { font-size: 4rem; margin-bottom: 15px; }
-    .caixa-apresentacao h1 { font-size: 1.8rem; color: #1e293b; margin-bottom: 10px; }
-    .caixa-apresentacao .slogan { font-size: 1rem; color: #64748b; margin-bottom: 15px; line-height: 1.6; }
-    .nome-sistema { font-size: 2.2rem; font-weight: bold; color: #10b981; margin: 15px 0; letter-spacing: 4px; }
-    .aviso { margin-top: 25px; padding: 12px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; color: #475569; }
-    .codigo { font-weight: bold; color: #1e293b; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 5px; }
+    .nome { font-size:2.2rem; font-weight:bold; color:#10b981; margin:15px 0; }
+    .aviso { margin-top:25px; padding:12px; background:#f1f5f9; border-radius:10px; font-size:.9rem; color:#475569; }
+    .botao-entrar { display:inline-block; margin-top:15px; padding:12px 30px; background:#10b981; color:#fff; border-radius:10px; text-decoration:none; font-weight:bold; }
+    .botao-entrar:hover { background:#059669; }
 
-    /* CONTEÚDO DO SISTEMA */
-    .conteudo-sistema { display: none; padding: 16px; max-width: 700px; margin: 0 auto; animation: aparecer 0.5s ease; }
-    @keyframes aparecer { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .conteudo { display:none; padding:16px; max-width:700px; margin:0 auto; }
+    .conteudo.mostrar { display:block; }
 
-    header { background: #1e293b; color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; }
-    h1 { font-size: 1.3rem; }
+    header { background:#1e293b; color:#fff; padding:20px; border-radius:16px; text-align:center; margin-bottom:20px; }
+    h2 { font-size:1rem; margin:20px 0 10px; }
+    .status-sync { font-size:.8rem; margin-bottom:10px; color:#475569; }
 
-    .voz { background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .btn-mic { width: 70px; height: 70px; border-radius: 50%; border: none; background: #10b981; color: white; font-size: 28px; cursor: pointer; pointer-events: auto; }
-    .btn-mic.ouvindo { background: #ef4444; animation: pulso 1s infinite; }
-    @keyframes pulso { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
-    .resposta { margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px; min-height: 40px; font-size: 0.9rem; }
-    .status-sync { font-size: 0.8rem; margin-top: 6px; color: #64748b; }
+    .perfis { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:15px; }
+    .btn-perfil { padding:10px 4px; border:3px solid transparent; border-radius:10px; font-weight:bold; font-size:.75rem; cursor:pointer; }
+    .saude { background:#fef2f2; color:#b91c1c; border-color:#ef4444; }
+    .fit { background:#f0fdf4; color:#15803d; border-color:#10b981; }
+    .caseiro { background:#fffbeb; color:#b45309; border-color:#f59e0b; }
+    .rapido { background:#faf5ff; color:#6b21a8; border-color:#8b5cf6; }
+    .gourmet { background:#fff7ed; color:#c2410c; border-color:#f97316; }
+    .selecionado { transform:scale(1.05); box-shadow:0 0 6px rgba(0,0,0,.2); }
 
-    h2 { font-size: 1rem; margin: 20px 0 10px; }
+    .caixa-form { background:#fff; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+    input, textarea { width:100%; padding:10px; border:2px solid #e2e8f0; border-radius:8px; margin-bottom:8px; font-size:1rem; }
+    button { padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:.95rem; }
+    .btn-azul { width:100%; background:#1e293b; color:#fff; margin-top:5px; }
+    .btn-whats { width:100%; background:#25d366; color:#fff; margin-top:10px; }
 
-    .perfis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
-    .btn-perfil { 
-      padding: 10px 4px; border: 3px solid transparent; border-radius: 10px; 
-      font-weight: bold; font-size: 0.75rem; cursor: pointer; pointer-events: auto;
-    }
-    .saude { background: #fef2f2; color: #b91c1c; border-color: #ef4444; }
-    .fit { background: #f0fdf4; color: #15803d; border-color: #10b981; }
-    .caseiro { background: #fffbeb; color: #b45309; border-color: #f59e0b; }
-    .rapido { background: #faf5ff; color: #6b21a8; border-color: #8b5cf6; }
-    .gourmet { background: #fff7ed; color: #c2410c; border-color: #f97316; }
-    .selecionado { transform: scale(1.05); box-shadow: 0 0 6px rgba(0,0,0,0.2); }
+    .pedido { background:#fff; border-radius:10px; padding:12px; margin:8px 0; border-left:5px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+    .pedido.saude { border-left-color:#ef4444; }
+    .pedido.fit { border-left-color:#10b981; }
+    .pedido.caseiro { border-left-color:#f59e0b; }
+    .pedido.rapido { border-left-color:#8b5cf6; }
+    .pedido.gourmet { border-left-color:#f97316; }
+    .pedido-nome { font-weight:bold; font-size:1rem; }
+    .etiqueta { display:inline-block; font-size:.75rem; font-weight:bold; padding:2px 8px; border-radius:10px; color:#fff; margin:4px 0; }
+    .restricao { font-size:.85rem; color:#b91c1c; background:#fef2f2; padding:4px 8px; border-radius:6px; display:inline-block; margin:4px 0; }
+    .botoes { display:flex; gap:8px; margin-top:8px; }
+    .btn-concluir { flex:1; background:#dcfce7; color:#166534; }
+    .btn-excluir { flex:1; background:#fee2e2; color:#b91c1c; }
 
-    .caixa { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    input, textarea { 
-      width: 100%; padding: 10px; border: 2px solid #e2e8f0; 
-      border-radius: 8px; margin-bottom: 8px; font-size: 1rem;
-      background: white; color: #0f172a; cursor: text; pointer-events: auto;
-    }
-    input:focus, textarea:focus { outline: none; border-color: #3b82f6; background: #fff; }
-    button { 
-      padding: 10px; border: none; border-radius: 8px; font-weight: bold; 
-      cursor: pointer; font-size: 0.95rem; pointer-events: auto;
-    }
-    .btn-azul { width: 100%; background: #1e293b; color: white; margin-top: 5px; }
-    .btn-azul:hover { background: #334155; }
-    .btn-whats { width: 100%; background: #25d366; color: white; margin-top: 10px; }
-    .btn-whats:hover { background: #22c55e; }
-
-    .pedido { background: white; border-radius: 10px; padding: 12px; margin: 8px 0; border-left: 5px solid #ccc; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .pedido.saude { border-left-color: #ef4444; }
-    .pedido.fit { border-left-color: #10b981; }
-    .pedido.caseiro { border-left-color: #f59e0b; }
-    .pedido.rapido { border-left-color: #8b5cf6; }
-    .pedido.gourmet { border-left-color: #f97316; }
-    .pedido-nome { font-weight: bold; font-size: 1rem; }
-    .etiqueta { display: inline-block; font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; color: white; margin: 4px 0; }
-    .restricao { font-size: 0.85rem; color: #b91c1c; background: #fef2f2; padding: 4px 8px; border-radius: 6px; display: inline-block; margin: 4px 0; }
-    .botoes { display: flex; gap: 8px; margin-top: 8px; }
-    .btn-concluir { flex: 1; background: #dcfce7; color: #166534; }
-    .btn-excluir { flex: 1; background: #fee2e2; color: #b91c1c; }
-
-    .lista-compra { background: #eff6ff; padding: 12px; border-radius: 10px; border: 2px dashed #93c5fd; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; margin-bottom: 10px; }
-    .topo-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .btn-copiar { background: #dbeafe; color: #1d4ed8; font-size: 0.85rem; padding: 4px 10px; border: none; border-radius: 6px; cursor: pointer; }
+    .lista-compra { background:#eff6ff; padding:12px; border-radius:10px; border:2px dashed #93c5fd; white-space:pre-wrap; font-size:.9rem; line-height:1.5; margin-bottom:10px; }
+    .topo-lista { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .btn-copiar { background:#dbeafe; color:#1d4ed8; font-size:.85rem; padding:4px 10px; border:none; border-radius:6px; cursor:pointer; }
   </style>
 </head>
 <body>
 
   <!-- TELA DE APRESENTAÇÃO -->
   <div class="tela-apresentacao" id="telaApresentacao">
-    <div class="caixa-apresentacao">
-      <div class="logo">🍳</div>
+    <div class="caixa">
       <h1>COZINHA MULTIPERFIL</h1>
-      <p class="slogan">Sistema de Gestão de Cardápios e Produção</p>
-      <div class="nome-sistema">ASEGEDEM</div>
-      <p class="slogan">Solução inteligente para organização de produção e pedidos</p>
-      <div class="aviso">
-        Acesso restrito.<br>
-        Adicione ao final do endereço: <span class="codigo">#ASEGEDEM</span>
-      </div>
+      <div class="nome">ASEGEDEM</div>
+      <p class="aviso">Solução inteligente para organização de produção e pedidos</p>
+      <a href="#ASEGEDEM" class="botao-entrar" onclick="abrirSistema()">🔓 ENTRAR NO SISTEMA</a>
     </div>
   </div>
 
-  <!-- SISTEMA -->
-  <div class="conteudo-sistema" id="sistema">
-
+  <!-- SISTEMA COMPLETO -->
+  <div class="conteudo" id="sistema">
     <header>
-      <h1>🍳 COZINHA MULTIPERFIL — ASEGEDEM</h1>
-      <p style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Gestão de Cardápios por Perfil</p>
+      <h1>🍳 ASEGEDEM — SISTEMA DE GESTÃO</h1>
     </header>
 
-    <div class="voz">
-      <button class="btn-mic" id="btnMic" onclick="ligarMicrofone()">🎙️</button>
-      <p style="margin:8px 0; font-size:0.9rem; color:#475569;">Toque para falar o comando</p>
-      <div class="resposta" id="respostaVoz">Aguardando...</div>
-      <div class="status-sync" id="statusSync">✅ Pronto</div>
-    </div>
+    <div class="status-sync" id="statusSync">🔄 Conectando ao Supabase...</div>
 
     <h2>👤 Selecione o Perfil</h2>
     <div class="perfis">
@@ -133,7 +95,7 @@
     </div>
 
     <h2>➕ Cadastrar Pedido</h2>
-    <div class="caixa">
+    <div class="caixa-form">
       <input type="text" id="nome" placeholder="Nome do cliente">
       <input type="number" id="qtd" placeholder="Quantidade de marmitas" min="1">
       <textarea id="obs" placeholder="Observações ou restrições..." rows="2"></textarea>
@@ -145,131 +107,130 @@
       <span id="totalMarmitas">Total: 0 marmitas</span>
       <button class="btn-copiar" onclick="copiarLista()">📋 Copiar</button>
     </div>
-    <div class="lista-compra" id="listaCompras">Nenhum pedido cadastrado ainda.</div>
-    <button class="btn-whats" onclick="enviarWhatsApp()">📲 Enviar para o Fornecedor</button>
+    <div class="lista-compra" id="listaCompras">Nenhum pedido cadastrado.</div>
+    <button class="btn-whats" onclick="enviarWhatsApp()">📲 Enviar WhatsApp</button>
 
     <h2>📦 Pedidos Cadastrados (<span id="contador">0</span>)</h2>
     <div id="pedidos"></div>
-
   </div>
 
 <script>
 // ==============================================
-// 🔑 ACESSO POR LINK — AGORA CERTO: #ASEGEDEM
+// 🔑 ACESSO — LINK OU BOTÃO
 // ==============================================
-const HASH_ACESSO = "#ASEGEDEM";
+function abrirSistema() {
+  document.getElementById('telaApresentacao').classList.add('oculta');
+  document.getElementById('sistema').classList.add('mostrar');
+  inicializarSupabase();
+}
 
 window.addEventListener('load', function() {
-  if (window.location.hash.toUpperCase() === "#ASEGEDEM") {
-    document.getElementById('telaApresentacao').classList.add('oculta');
-    document.getElementById('sistema').style.display = 'block';
-    carregarDados();
+  const hash = (window.location.hash || '').toUpperCase().trim();
+  if (hash === "#ASEGEDEM") {
+    setTimeout(abrirSistema, 300);
   }
 });
 
 // ==============================================
-// ✅ BANCO DE DADOS SUPABASE
+// 💾 SUPABASE — SALVA TUDO NA NUVEM
 // ==============================================
 const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
-let supabase;
-try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-} catch(e) {
-  console.log("Supabase indisponível — usando armazenamento local");
+const TABELA = "pedidos";
+let supabase = null;
+
+async function inicializarSupabase() {
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    document.getElementById('statusSync').textContent = "✅ Conectado ao Supabase — salvando na nuvem";
+    await carregarDadosDoSupabase();
+  } catch(e) {
+    document.getElementById('statusSync').textContent = "⚠️ Usando armazenamento local";
+    carregarDadosLocal();
+  }
+}
+
+// ==============================================
+// 📂 CARREGAR DADOS — PRIMEIRO DO SUPABASE
+// ==============================================
+async function carregarDadosDoSupabase() {
+  try {
+    const { data, error } = await supabase.from(TABELA).select('*').order('id', { ascending: false });
+    if (error) throw error;
+    if (data && data.length > 0) {
+      pedidos = data;
+      montarListaPedidos();
+      montarListaCompras();
+      document.getElementById('statusSync').textContent = `✅ ${pedidos.length} pedidos carregados da nuvem`;
+    } else {
+      carregarDadosLocal();
+    }
+  } catch(e) {
+    console.log("Supabase indisponível:", e);
+    carregarDadosLocal();
+  }
+}
+
+function carregarDadosLocal() {
+  const salvo = localStorage.getItem('cozinha');
+  if (salvo) {
+    pedidos = JSON.parse(salvo);
+    montarListaPedidos();
+    montarListaCompras();
+  }
+}
+
+// ==============================================
+// 💾 SALVAR — SUPABASE + LOCAL (SEGURANÇA DUPLA)
+// ==============================================
+async function salvarDados(pedidoAtual = null) {
+  localStorage.setItem('cozinha', JSON.stringify(pedidos));
+  
+  if (supabase && pedidoAtual) {
+    try {
+      await supabase.from(TABELA).upsert([pedidoAtual]);
+      document.getElementById('statusSync').textContent = "✅ Salvo na nuvem!";
+    } catch(e) {
+      document.getElementById('statusSync').textContent = "⚠️ Salvo localmente apenas";
+    }
+  }
 }
 
 // ==============================================
 // CARDÁPIOS
 // ==============================================
 const cardapios = {
-  saude: [
-    "Peixe grelhado + Purê de mandioquinha + Legumes no vapor",
-    "Frango cozido + Arroz de couve-flor + Mandioca",
-    "Carne moída magra + Abobrinha + Purê de batata",
-    "Sopa de abóbora com frango + Gengibre",
-    "Omelete de claras + Espinafre + Arroz"
-  ],
-  fit: [
-    "Frango grelhado 150g + Batata-doce + Vagem",
-    "Carne moída + Arroz integral + Feijão + Brócolis",
-    "Peixe grelhado + Purê de mandioca + Salada",
-    "Carne magra + Macarrão integral + Legumes",
-    "Frango desfiado + Arroz com lentilha + Couve"
-  ],
-  caseiro: [
-    "Bife acebolado + Arroz + Feijão + Farofa",
-    "Frango assado + Batata + Salada",
-    "Lombo + Arroz + Couve refogada",
-    "Peixe ensopado + Arroz + Pirão",
-    "Carne ao molho + Macarrão + Salada"
-  ],
-  rapido: [
-    "Escondidinho de frango com purê",
-    "Arroz com carne e legumes",
-    "Frango desfiado com legumes",
-    "Carne moída com feijão e arroz",
-    "Macarrão com frango e molho"
-  ],
-  gourmet: [
-    "Lasanha de carne com molho de tomate",
-    "Nhoque ao molho de queijo + Filé",
-    "Frango à parmegiana + Arroz + Batata",
-    "Strogonoff de carne + Arroz + Batata palha",
-    "Costela com purê de mandioca gratinado"
-  ]
+  saude: ["Peixe grelhado + Purê de mandioquinha + Legumes no vapor","Frango cozido + Arroz de couve-flor + Mandioca","Carne moída magra + Abobrinha + Purê de batata","Sopa de abóbora com frango + Gengibre","Omelete de claras + Espinafre + Arroz"],
+  fit: ["Frango grelhado 150g + Batata-doce + Vagem","Carne moída + Arroz integral + Feijão + Brócolis","Peixe grelhado + Purê de mandioca + Salada","Carne magra + Macarrão integral + Legumes","Frango desfiado + Arroz com lentilha + Couve"],
+  caseiro: ["Bife acebolado + Arroz + Feijão + Farofa","Frango assado + Batata + Salada","Lombo + Arroz + Couve refogada","Peixe ensopado + Arroz + Pirão","Carne ao molho + Macarrão + Salada"],
+  rapido: ["Escondidinho de frango com purê","Arroz com carne e legumes","Frango desfiado com legumes","Carne moída com feijão e arroz","Macarrão com frango e molho"],
+  gourmet: ["Lasanha de carne com molho de tomate","Nhoque ao molho de queijo + Filé","Frango à parmegiana + Arroz + Batata","Strogonoff de carne + Arroz + Batata palha","Costela com purê de mandioca gratinado"]
 };
 
-let perfilEscolhido = null;
-let nomePerfil = "";
-let pedidos = [];
-let reconhecimento = null;
-
-// ==============================================
-// 📂 CARREGAR DADOS
-// ==============================================
-function carregarDados() {
-  const salvo = localStorage.getItem('cozinha');
-  if (salvo) { 
-    pedidos = JSON.parse(salvo); 
-    montarListaPedidos(); 
-    montarListaCompras();
-  }
-  document.getElementById('statusSync').textContent = "✅ Pronto — " + pedidos.length + " pedidos";
-}
-
-// ==============================================
-// 💾 SALVAR DADOS
-// ==============================================
-function salvarDados() {
-  localStorage.setItem('cozinha', JSON.stringify(pedidos));
-  document.getElementById('statusSync').textContent = "✅ Salvo — " + pedidos.length + " pedidos";
-}
+let perfilEscolhido = null, nomePerfil = "", pedidos = [];
 
 // ==============================================
 // 👤 ESCOLHER PERFIL
 // ==============================================
 function escolherPerfil(tipo, nome) {
-  document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
+  document.querySelectorAll('.btn-perfil').forEach(b=>b.classList.remove('selecionado'));
   document.getElementById(`p-${tipo}`).classList.add('selecionado');
-  perfilEscolhido = tipo;
-  nomePerfil = nome;
-  falar("Perfil " + nome + " selecionado. Digite os dados e clique em cadastrar.");
+  perfilEscolhido = tipo; nomePerfil = nome;
 }
 
 // ==============================================
-// ✅ CADASTRAR PEDIDO
+// ✅ CADASTRAR — SALVA NO SUPABASE
 // ==============================================
-function cadastrar() {
+async function cadastrar() {
   const nome = document.getElementById('nome').value.trim();
   const qtd = parseInt(document.getElementById('qtd').value) || 1;
   const obs = document.getElementById('obs').value.trim() || "Sem restrições";
-
+  
   if (!nome) { alert("Digite o nome do cliente!"); return; }
   if (!perfilEscolhido) { alert("Escolha um perfil primeiro!"); return; }
 
   const cardapioEscolhido = cardapios[perfilEscolhido][Math.floor(Math.random() * 5)];
-
+  
   const pedido = {
     id: Date.now(),
     nome: nome,
@@ -282,13 +243,11 @@ function cadastrar() {
   };
 
   pedidos.unshift(pedido);
-  salvarDados();
+  await salvarDados(pedido);
   limparCampos();
   montarListaPedidos();
   montarListaCompras();
-
-  falar("Cadastrado " + qtd + " marmita de " + nome + ". Perfil " + nomePerfil);
-  alert("✅ Pedido cadastrado com sucesso!");
+  alert("✅ Pedido cadastrado e salvo na nuvem!");
 }
 
 // ==============================================
@@ -297,7 +256,6 @@ function cadastrar() {
 function montarListaPedidos() {
   const area = document.getElementById('pedidos');
   area.innerHTML = "";
-
   pedidos.forEach(p => {
     const div = document.createElement('div');
     div.className = `pedido ${p.perfil}`;
@@ -306,7 +264,7 @@ function montarListaPedidos() {
       <span class="etiqueta ${p.perfil}">${p.perfilNome}</span>
       <div>🍽️ ${p.quantidade} marmita${p.quantidade>1?'s':''}</div>
       <div style="margin:4px 0;">${p.cardapio}</div>
-      ${p.observacao !== "Sem restrições" ? `<div class="restricao">⚠️ ${p.observacao}</div>` : ""}
+      ${p.observacao!=="Sem restrições"?`<div class="restricao">⚠️ ${p.observacao}</div>`:""}
       <div class="botoes">
         <button class="btn-concluir" onclick="concluir(${p.id})">${p.concluido?'↩️ Refazer':'✅ Concluído'}</button>
         <button class="btn-excluir" onclick="excluir(${p.id})">🗑️ Excluir</button>
@@ -314,7 +272,6 @@ function montarListaPedidos() {
     `;
     area.appendChild(div);
   });
-
   document.getElementById('contador').textContent = pedidos.length;
 }
 
@@ -328,37 +285,39 @@ function montarListaCompras() {
     document.getElementById('totalMarmitas').textContent = "Total: 0 marmitas";
     return;
   }
-
-  let texto = "📦 LISTA DE COMPRAS — ASEGEDEM\n═════════════════════════════\n\n";
-  let total = 0;
-  ativos.forEach(ped => {
-    total += ped.quantidade;
-    texto += `🔹 ${ped.nome} — ${ped.quantidade}x ${ped.perfilNome}\n   ${ped.cardapio}\n`;
-    if (ped.observacao !== "Sem restrições") texto += `   ⚠️ ${ped.observacao}\n`;
+  let texto = "📦 LISTA DE COMPRAS — ASEGEDEM\n═════════════════════════════\n\n", total = 0;
+  ativos.forEach(p => {
+    total += p.quantidade;
+    texto += `🔹 ${p.nome} — ${p.quantidade}x ${p.perfilNome}\n   ${p.cardapio}\n`;
+    if (p.observacao !== "Sem restrições") texto += `   ⚠️ ${p.observacao}\n`;
     texto += "\n";
   });
   texto += "═════════════════════════════\n✅ TOTAL: " + total + " marmitas";
-
   document.getElementById('listaCompras').textContent = texto;
   document.getElementById('totalMarmitas').textContent = `Total: ${total} marmitas`;
 }
 
 // ==============================================
-// ✅ CONCLUIR E EXCLUIR
+// ✅ CONCLUIR / EXCLUIR — ATUALIZA NO SUPABASE
 // ==============================================
-function concluir(id) {
+async function concluir(id) {
   const p = pedidos.find(x => x.id === id);
   if (p) {
     p.concluido = !p.concluido;
-    salvarDados();
+    await salvarDados(p);
     montarListaPedidos();
     montarListaCompras();
   }
 }
-function excluir(id) {
-  if (!confirm("Tem certeza?")) return;
+async function excluir(id) {
+  if (!confirm("Tem certeza que deseja excluir?")) return;
   pedidos = pedidos.filter(x => x.id !== id);
-  salvarDados();
+  localStorage.setItem('cozinha', JSON.stringify(pedidos));
+  if (supabase) {
+    try {
+      await supabase.from(TABELA).delete().eq('id', id);
+    } catch(e) { console.log("Erro ao excluir no Supabase"); }
+  }
   montarListaPedidos();
   montarListaCompras();
 }
@@ -385,62 +344,6 @@ function limparCampos() {
   document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
   perfilEscolhido = null;
   nomePerfil = "";
-}
-
-// ==============================================
-// 🎙️ MICROFONE
-// ==============================================
-function ligarMicrofone() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    alert("⚠️ Use o Google Chrome para o microfone!");
-    return;
-  }
-
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const btn = document.getElementById('btnMic');
-  const resp = document.getElementById('respostaVoz');
-
-  if (!reconhecimento) {
-    reconhecimento = new SR();
-    reconhecimento.lang = 'pt-BR';
-
-    reconhecimento.onstart = () => {
-      btn.classList.add('ouvindo');
-      resp.textContent = "🔊 Ouvindo... Fale agora!";
-    };
-
-    reconhecimento.onresult = (evento) => {
-      const fala = evento.results[0][0].transcript.toLowerCase();
-      resp.textContent = "Você disse: " + fala;
-      interpretarComando(fala);
-    };
-
-    reconhecimento.onend = () => {
-      btn.classList.remove('ouvindo');
-      resp.textContent = "Aguardando...";
-    };
-  }
-
-  reconhecimento.start();
-}
-
-function interpretarComando(fala) {
-  if (fala.includes('saúde') || fala.includes('pós')) escolherPerfil('saude','Saúde');
-  else if (fala.includes('fit') || fala.includes('academia')) escolherPerfil('fit','Fit');
-  else if (fala.includes('caseiro') || fala.includes('tradicional')) escolherPerfil('caseiro','Caseiro');
-  else if (fala.includes('rápido') || fala.includes('solteiro')) escolherPerfil('rapido','Rápido');
-  else if (fala.includes('gourmet') || fala.includes('massa') || fala.includes('queijo')) escolherPerfil('gourmet','Gourmet');
-  else if (fala.includes('cadastrar') || fala.includes('cadastra')) cadastrar();
-  else falar("Entendi: " + fala);
-}
-
-function falar(frase) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const fala = new SpeechSynthesisUtterance(frase);
-    fala.lang = 'pt-BR'; fala.rate = 1.0;
-    window.speechSynthesis.speak(fala);
-  }
 }
 </script>
 </body>
