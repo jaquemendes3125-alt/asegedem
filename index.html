@@ -3,19 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍳 Cozinha Simples — Controle de Marmitas</title>
+  <title>🍳 Cozinha Simples — Ingredientes Brasileiros</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     body { background: #f0f4f8; padding: 10px; font-size: 16px; }
 
+    .tela-senha { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e293b; display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .caixa-senha { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 320px; text-align: center; }
+    .caixa-senha h2 { margin-bottom: 20px; color: #1e293b; }
+    .caixa-senha input { width: 100%; padding: 12px; font-size: 1.2rem; text-align: center; border: 2px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; }
+    .btn-entrar { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+    .erro { color: #ef4444; margin-top: 10px; display: none; }
+
+    .escondido { display: none !important; }
     .cabecalho { background: #1e293b; color: white; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
-    .aviso { background: #fef3c7; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; }
+    .aviso { background: #dcfce7; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; border-left: 4px solid #22c55e; }
 
     h2 { font-size: 1.1rem; margin: 20px 0 10px; color: #334155; }
 
-    /* Botoes de Cor */
     .cores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 15px; }
-    .cor { padding: 10px 5px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
+    .cor { padding: 10px 3px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
     .v { background: #fee2e2; color: #b91c1c; border: 3px solid #ef4444; }
     .vd { background: #dcfce7; color: #166534; border: 3px solid #22c55e; }
     .a { background: #fef9c3; color: #854d0e; border: 3px solid #eab308; }
@@ -23,14 +30,11 @@
     .l { background: #ffedd5; color: #c2410c; border: 3px solid #f97316; }
     .selecionada { transform: scale(1.05); box-shadow: 0 0 8px rgba(0,0,0,0.25); }
 
-    /* Formulario */
-    .caixa { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .caixa { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
     input, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; }
     .botao-salvar { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
-    .botao-salvar:hover { background: #059669; }
     .botao-limpar { width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 5px; cursor: pointer; }
 
-    /* Lista de Pedidos */
     .pedido { background: white; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 5px solid #ccc; }
     .pedido.v { border-left-color: #ef4444; }
     .pedido.vd { border-left-color: #22c55e; }
@@ -41,118 +45,214 @@
     .nome { font-weight: bold; font-size: 1.05rem; margin-bottom: 4px; }
     .tipo { display: inline-block; font-size: 0.8rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; color: white; margin: 4px 0; }
     .obs { font-size: 0.9rem; color: #b91c1c; background: #fef2f2; padding: 4px 8px; border-radius: 6px; margin-top: 4px; }
-
     .linha { display: flex; gap: 8px; margin-top: 8px; }
     .btn-pronto { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #dcfce7; color: #166534; font-weight: bold; cursor: pointer; }
     .btn-apagar { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #fee2e2; color: #b91c1c; font-weight: bold; cursor: pointer; }
-
-    /* Lista de Compras */
-    .lista { background: #eff6ff; padding: 12px; border-radius: 8px; white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; }
-    .topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .botao-copiar { padding: 5px 12px; background: #dbeafe; color: #1d4ed8; border: none; border-radius: 6px; cursor: pointer; }
-    .botao-whats { width: 100%; padding: 10px; background: #25d366; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; font-size: 1rem; }
     .pronto { opacity: 0.6; text-decoration: line-through; }
+
+    .lista { background: #eff6ff; padding: 12px; border-radius: 8px; white-space: pre-wrap; font-size: 0.95rem; line-height: 1.8; }
+    .topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+    .botao-copiar { padding: 6px 12px; background: #dbeafe; color: #1d4ed8; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .botao-whats { width: 100%; padding: 12px; background: #25d366; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 12px; cursor: pointer; font-size: 1.1rem; }
+    .destaque { background: #fef3c7; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
   </style>
 </head>
 <body>
 
+<!-- TELA DE SENHA -->
+<div class="tela-senha" id="telaSenha">
+  <div class="caixa-senha">
+    <h2>🔒 Acesso ao Sistema</h2>
+    <input type="password" id="senha" placeholder="Digite a senha">
+    <button class="btn-entrar" onclick="verificarSenha()">ENTRAR</button>
+    <div class="erro" id="erroSenha">Senha errada! Tente de novo.</div>
+  </div>
+</div>
+
+<!-- TELA PRINCIPAL -->
+<div id="telaPrincipal" class="escondido">
+
   <div class="cabecalho">
     <h1>🍳 COZINHA SIMPLES</h1>
-    <p>Controle de Marmitas — Sem Complicação</p>
+    <p>Ingredientes da Cozinha Brasileira — Lista Automática</p>
   </div>
 
   <div class="aviso">
-    💡 <strong>Como usar:</strong> Escolha a cor → digite o nome → salve. Pronto!
+    ✅ <strong>Como funciona:</strong> Escolha a cor → digite nome → salve. <strong>A lista de compras aparece sozinha!</strong>
   </div>
 
   <h2>🎨 Escolha o Tipo de Cliente</h2>
   <div class="cores">
-    <button class="cor v" id="cv" onclick="escolherCor('v','Saúde / Sem Leite')">🔴 Saúde</button>
-    <button class="cor vd" id="cvd" onclick="escolherCor('vd','Fit / Sem Gordura')">🟢 Fit</button>
-    <button class="cor a" id="ca" onclick="escolherCor('a','Comida Caseira')">🟡 Comum</button>
-    <button class="cor r" id="cr" onclick="escolherCor('r','Prático / Rápido')">🟣 Rápido</button>
-    <button class="cor l" id="cl" onclick="escolherCor('l','Sabor / Especial')">🟠 Sabor</button>
+    <button class="cor v" id="cv" onclick="escolherCor('v','Saúde')">🔴 Saúde</button>
+    <button class="cor vd" id="cvd" onclick="escolherCor('vd','Fit')">🟢 Fit</button>
+    <button class="cor a" id="ca" onclick="escolherCor('a','Comum')">🟡 Comum</button>
+    <button class="cor r" id="cr" onclick="escolherCor('r','Rápido')">🟣 Rápido</button>
+    <button class="cor l" id="cl" onclick="escolherCor('l','Sabor')">🟠 Sabor</button>
   </div>
 
   <h2>➕ Cadastrar Marmita</h2>
   <div class="caixa">
     <input type="text" id="nome" placeholder="Nome do Cliente">
     <input type="number" id="quantas" placeholder="Quantas marmitas?" min="1" value="1">
-    <textarea id="obs" placeholder="Tem restrição? Ex: Sem leite, sem pimenta..." rows="2"></textarea>
+    <textarea id="obs" placeholder="Alguma restrição ou observação?" rows="2"></textarea>
     <button class="botao-salvar" onclick="salvarPedido()">✅ SALVAR PEDIDO</button>
   </div>
 
-  <h2>🛒 Lista de Compras</h2>
+  <h2>🛒 LISTA DE COMPRAS — GERADA AUTOMATICAMENTE</h2>
   <div class="topo">
-    <span id="total">Total: 0 marmitas</span>
-    <button class="botao-copiar" onclick="copiarLista()">📋 Copiar</button>
+    <span class="destaque" id="totalMarmitas">Total: 0 marmitas</span>
+    <button class="botao-copiar" onclick="copiarLista()">📋 Copiar Lista</button>
   </div>
-  <div class="caixa lista" id="listaCompras">Nenhum pedido salvo.</div>
-  <button class="botao-whats" onclick="enviarWhats()">📲 Mandar no WhatsApp</button>
+  <div class="caixa lista" id="listaCompras">
+    ⏳ Cadastre um pedido que a lista aparece aqui...
+  </div>
+  <button class="botao-whats" onclick="enviarWhats()">📲 ENVIAR NO WHATSAPP</button>
 
   <h2>📦 Pedidos Salvos (<span id="contador">0</span>)</h2>
   <div id="pedidos"></div>
 
   <button class="botao-limpar" onclick="limparTudo()">🗑️ LIMPAR TUDO</button>
 
+</div>
+
 <script>
 // ==============================================
-// ARMAZENA TUDO NO PRÓPRIO CELULAR
+// 🔒 SENHA
 // ==============================================
-let pedidos = [];
-let corEscolhida = null;
-let nomeTipo = "";
+const SENHA_CORRETA = "SIESTA";
 
-// Quando abrir a página, carrega o que já foi salvo
-window.onload = function() {
-  carregarDados();
-  montarTela();
-};
-
-// ==============================================
-// ESCOLHER A COR
-// ==============================================
-function escolherCor(cor, texto) {
-  document.querySelectorAll('.cor').forEach(b => b.classList.remove('selecionada'));
-  document.getElementById('c' + cor).classList.add('selecionada');
-  corEscolhida = cor;
-  nomeTipo = texto;
+function verificarSenha() {
+  const senha = document.getElementById('senha').value;
+  if (senha === SENHA_CORRETA) {
+    document.getElementById('telaSenha').classList.add('escondido');
+    document.getElementById('telaPrincipal').classList.remove('escondido');
+    carregarDados();
+    montarTela();
+  } else {
+    document.getElementById('erroSenha').style.display = 'block';
+    document.getElementById('senha').value = '';
+  }
 }
 
 // ==============================================
-// SALVAR NOVO PEDIDO
+// 📋 INGREDIENTES DA COZINHA BRASILEIRA
+// ==============================================
+const INGREDIENTES = {
+  v: {
+    nome: "🔴 Saúde / Leve",
+    itens: "Peixe branco, frango, mandioquinha, cenoura, chuchu, abobrinha, abóbora, arroz, batata, ervas, azeite"
+  },
+  vd: {
+    nome: "🟢 Fit / Dieta",
+    itens: "Peito de frango, batata-doce, arroz integral, feijão preto, brócolis, vagem, ovo, frutas"
+  },
+  a: {
+    nome: "🟡 Comida Caseira",
+    itens: "Carne bovina, arroz branco, feijão carioca, farinha, farofa, cenoura, beterraba, alface, tomate, cebola, alho, óleo, sal, cheiro-verde"
+  },
+  r: {
+    nome: "🟣 Prato Rápido",
+    itens: "Carne seca, mandioca, frango desfiado, milho verde, arroz, queijo, tomate, cebola"
+  },
+  l: {
+    nome: "🟠 Sabor / Especial",
+    itens: "Carne moída, macarrão, molho de tomate, queijo, creme de leite, batata, cenoura, cebola, alho, tempero, óleo"
+  }
+};
+
+let pedidos = [];
+let corEscolhida = null;
+
+// ==============================================
+// ESCOLHER COR
+// ==============================================
+function escolherCor(cor) {
+  document.querySelectorAll('.cor').forEach(b => b.classList.remove('selecionada'));
+  document.getElementById('c' + cor).classList.add('selecionada');
+  corEscolhida = cor;
+}
+
+// ==============================================
+// SALVAR PEDIDO
 // ==============================================
 function salvarPedido() {
   const nome = document.getElementById('nome').value.trim();
   const qtd = parseInt(document.getElementById('quantas').value) || 1;
-  const obs = document.getElementById('obs').value.trim() || "Nenhuma restrição";
+  const obs = document.getElementById('obs').value.trim() || "";
 
   if (!nome) { alert("⚠️ Digite o nome do cliente!"); return; }
   if (!corEscolhida) { alert("⚠️ Escolha uma cor primeiro!"); return; }
 
-  const pedido = {
+  pedidos.unshift({
     id: Date.now(),
     nome: nome,
     cor: corEscolhida,
-    tipo: nomeTipo,
     quantidade: qtd,
     observacao: obs,
     pronto: false
-  };
+  });
 
-  pedidos.unshift(pedido);
   salvarDados();
   limparCampos();
   montarTela();
-  alert("✅ Pedido salvo!");
+  alert("✅ Pedido salvo! Lista de compras já atualizada 👇");
+}
+
+// ==============================================
+// 🧠 GERA LISTA DE COMPRAS SOZINHA
+// ==============================================
+function montarListaCompras() {
+  const ativos = pedidos.filter(p => !p.pronto);
+  if (ativos.length === 0) {
+    return "⏳ Cadastre um pedido que a lista aparece aqui...";
+  }
+
+  let texto = "🛒 LISTA DE COMPRAS — COZINHA SIMPLES\n";
+  texto += "═════════════════════════════════════════════\n\n";
+
+  let totalMarmitas = 0;
+  let resumoPorTipo = {};
+
+  ativos.forEach(p => {
+    totalMarmitas += p.quantidade;
+    if (!resumoPorTipo[p.cor]) {
+      resumoPorTipo[p.cor] = { qtd: 0, nomes: [], obs: [] };
+    }
+    resumoPorTipo[p.cor].qtd += p.quantidade;
+    resumoPorTipo[p.cor].nomes.push(p.nome);
+    if (p.observacao) resumoPorTipo[p.cor].obs.push(`${p.nome}: ${p.observacao}`);
+  });
+
+  for (let cor in resumoPorTipo) {
+    const tipo = INGREDIENTES[cor];
+    const info = resumoPorTipo[cor];
+    texto += `${tipo.nome} — ${info.qtd} marmita${info.qtd>1?'s':''}\n`;
+    texto += `   👤 ${info.nomes.join(', ')}\n`;
+    texto += `   📦 ${tipo.itens}\n`;
+    if (info.obs.length > 0) {
+      info.obs.forEach(a => { texto += `   ⚠️ ${a}\n`; });
+    }
+    texto += "\n";
+  }
+
+  texto += "═════════════════════════════════════════════\n";
+  texto += `✅ TOTAL: ${totalMarmitas} marmitas\n`;
+  texto += "👉 Lista pronta! Copie e envie ao fornecedor.";
+
+  return texto;
 }
 
 // ==============================================
 // MOSTRAR TUDO NA TELA
 // ==============================================
 function montarTela() {
+  const listaTexto = montarListaCompras();
+  document.getElementById('listaCompras').textContent = listaTexto;
+
+  const totalAtivos = pedidos.filter(p => !p.pronto).reduce((s, p) => s + p.quantidade, 0);
+  document.getElementById('totalMarmitas').textContent = `Total: ${totalAtivos} marmitas`;
+
   mostrarPedidos();
-  mostrarListaCompras();
 }
 
 function mostrarPedidos() {
@@ -163,9 +263,9 @@ function mostrarPedidos() {
     div.className = `pedido ${p.cor} ${p.pronto ? 'pronto' : ''}`;
     div.innerHTML = `
       <div class="nome">${p.nome}</div>
-      <span class="tipo ${p.cor}">${p.tipo}</span>
+      <span class="tipo ${p.cor}">${INGREDIENTES[p.cor].nome}</span>
       <div>🍽️ ${p.quantidade} marmita${p.quantidade>1?'s':''}</div>
-      ${p.observacao !== "Nenhuma restrição" ? `<div class="obs">⚠️ ${p.observacao}</div>` : ""}
+      ${p.observacao ? `<div class="obs">⚠️ ${p.observacao}</div>` : ""}
       <div class="linha">
         <button class="btn-pronto" onclick="marcarPronto(${p.id})">${p.pronto?'↩️ Refazer':'✅ Pronto'}</button>
         <button class="btn-apagar" onclick="apagar(${p.id})">🗑️ Apagar</button>
@@ -176,32 +276,8 @@ function mostrarPedidos() {
   document.getElementById('contador').textContent = pedidos.length;
 }
 
-function mostrarListaCompras() {
-  const ativos = pedidos.filter(p => !p.pronto);
-  if (ativos.length === 0) {
-    document.getElementById('listaCompras').textContent = "Nenhum pedido ativo.";
-    document.getElementById('total').textContent = "Total: 0 marmitas";
-    return;
-  }
-
-  let texto = "📦 LISTA DE COMPRAS\n═════════════════════════════\n\n";
-  let total = 0;
-  ativos.forEach(p => {
-    total += p.quantidade;
-    texto += `🔹 ${p.nome} — ${p.quantidade}x ${p.tipo}\n`;
-    if (p.observacao !== "Nenhuma restrição") {
-      texto += `   ⚠️ ${p.observacao}\n`;
-    }
-    texto += "\n";
-  });
-  texto += "═════════════════════════════\n✅ TOTAL: " + total + " marmitas";
-
-  document.getElementById('listaCompras').textContent = texto;
-  document.getElementById('total').textContent = `Total: ${total} marmitas`;
-}
-
 // ==============================================
-// MARCAR COMO PRONTO OU APAGAR
+// AÇÕES
 // ==============================================
 function marcarPronto(id) {
   const p = pedidos.find(x => x.id === id);
@@ -213,18 +289,15 @@ function marcarPronto(id) {
 }
 
 function apagar(id) {
-  if (!confirm("Tem certeza que quer apagar?")) return;
+  if (!confirm("Tem certeza?")) return;
   pedidos = pedidos.filter(x => x.id !== id);
   salvarDados();
   montarTela();
 }
 
-// ==============================================
-// COPIAR E MANDAR NO WHATSAPP
-// ==============================================
 function copiarLista() {
   const texto = document.getElementById('listaCompras').textContent;
-  navigator.clipboard.writeText(texto).then(() => alert("✅ Lista copiada!"));
+  navigator.clipboard.writeText(texto).then(() => alert("✅ Lista copiada! Vá no WhatsApp e cole."));
 }
 
 function enviarWhats() {
@@ -233,7 +306,7 @@ function enviarWhats() {
 }
 
 // ==============================================
-// SALVAR E CARREGAR DO CELULAR
+// SALVAR E CARREGAR
 // ==============================================
 function salvarDados() {
   localStorage.setItem('cozinhaSimples', JSON.stringify(pedidos));
@@ -241,31 +314,22 @@ function salvarDados() {
 
 function carregarDados() {
   const salvo = localStorage.getItem('cozinhaSimples');
-  if (salvo) {
-    pedidos = JSON.parse(salvo);
-  }
+  if (salvo) pedidos = JSON.parse(salvo);
 }
 
-// ==============================================
-// LIMPAR TUDO
-// ==============================================
-function limparTudo() {
-  if (!confirm("Tem certeza? Vai apagar TODOS os pedidos!")) return;
-  pedidos = [];
-  localStorage.removeItem('cozinhaSimples');
-  montarTela();
-}
-
-// ==============================================
-// LIMPAR CAMPOS DEPOIS DE SALVAR
-// ==============================================
 function limparCampos() {
   document.getElementById('nome').value = "";
   document.getElementById('quantas').value = "1";
   document.getElementById('obs').value = "";
   document.querySelectorAll('.cor').forEach(b => b.classList.remove('selecionada'));
   corEscolhida = null;
-  nomeTipo = "";
+}
+
+function limparTudo() {
+  if (!confirm("Apagar TODOS os pedidos?")) return;
+  pedidos = [];
+  localStorage.removeItem('cozinhaSimples');
+  montarTela();
 }
 </script>
 </body>
