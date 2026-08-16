@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍳 Cozinha Simples — Ingredientes Brasileiros</title>
+  <title>🍳 Cozinha Simples — Com Cálculo e Quantidades</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     body { background: #f0f4f8; padding: 10px; font-size: 16px; }
@@ -11,7 +11,7 @@
     .tela-senha { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e293b; display: flex; align-items: center; justify-content: center; z-index: 100; }
     .caixa-senha { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 320px; text-align: center; }
     .caixa-senha h2 { margin-bottom: 20px; color: #1e293b; }
-    .caixa-senha input { width: 100%; padding: 12px; font-size: 1.2rem; text-align: center; border: 2px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; }
+    .caixa-senha input { width: 100%; padding: 12px; font-size: 1.5rem; text-align: center; border: 2px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; }
     .btn-entrar { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
     .erro { color: #ef4444; margin-top: 10px; display: none; }
 
@@ -31,7 +31,7 @@
     .selecionada { transform: scale(1.05); box-shadow: 0 0 8px rgba(0,0,0,0.25); }
 
     .caixa { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-    input, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; }
+    input, textarea, select { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; }
     .botao-salvar { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
     .botao-limpar { width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 5px; cursor: pointer; }
 
@@ -50,11 +50,12 @@
     .btn-apagar { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #fee2e2; color: #b91c1c; font-weight: bold; cursor: pointer; }
     .pronto { opacity: 0.6; text-decoration: line-through; }
 
-    .lista { background: #eff6ff; padding: 12px; border-radius: 8px; white-space: pre-wrap; font-size: 0.95rem; line-height: 1.8; }
+    .lista { background: #eff6ff; padding: 12px; border-radius: 8px; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.8; }
     .topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
     .botao-copiar { padding: 6px 12px; background: #dbeafe; color: #1d4ed8; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .botao-whats { width: 100%; padding: 12px; background: #25d366; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 12px; cursor: pointer; font-size: 1.1rem; }
     .destaque { background: #fef3c7; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .aviso-matematica { background: #e0e7ff; padding: 8px; border-radius: 6px; margin: 8px 0; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -63,7 +64,7 @@
 <div class="tela-senha" id="telaSenha">
   <div class="caixa-senha">
     <h2>🔒 Acesso ao Sistema</h2>
-    <input type="password" id="senha" placeholder="Digite a senha">
+    <input type="number" id="senha" placeholder="Digite a senha">
     <button class="btn-entrar" onclick="verificarSenha()">ENTRAR</button>
     <div class="erro" id="erroSenha">Senha errada! Tente de novo.</div>
   </div>
@@ -73,12 +74,12 @@
 <div id="telaPrincipal" class="escondido">
 
   <div class="cabecalho">
-    <h1>🍳 COZINHA SIMPLES</h1>
-    <p>Ingredientes da Cozinha Brasileira — Lista Automática</p>
+    <h1>🍳 AJUDANTE DE COZINHA ASEGEDEM </h1>
+    <p>Com Cálculo Automático de Quantidades e Lista de Compras Real</p>
   </div>
 
   <div class="aviso">
-    ✅ <strong>Como funciona:</strong> Escolha a cor → digite nome → salve. <strong>A lista de compras aparece sozinha!</strong>
+    ✅ <strong>Como funciona:</strong> Escolha a cor → digite nome → escolha o dia da semana → salve. <strong>A lista de compras com quantidades reais aparece sozinha!</strong>
   </div>
 
   <h2>🎨 Escolha o Tipo de Cliente</h2>
@@ -93,12 +94,24 @@
   <h2>➕ Cadastrar Marmita</h2>
   <div class="caixa">
     <input type="text" id="nome" placeholder="Nome do Cliente">
+    <select id="diaSemana">
+      <option value="1">Segunda-feira</option>
+      <option value="2">Terça-feira</option>
+      <option value="3">Quarta-feira</option>
+      <option value="4">Quinta-feira</option>
+      <option value="5">Sexta-feira</option>
+      <option value="6">Sábado</option>
+      <option value="7">Domingo</option>
+    </select>
     <input type="number" id="quantas" placeholder="Quantas marmitas?" min="1" value="1">
     <textarea id="obs" placeholder="Alguma restrição ou observação?" rows="2"></textarea>
     <button class="botao-salvar" onclick="salvarPedido()">✅ SALVAR PEDIDO</button>
   </div>
 
-  <h2>🛒 LISTA DE COMPRAS — GERADA AUTOMATICAMENTE</h2>
+  <h2>🛒 LISTA DE COMPRAS — COM QUANTIDADES REAIS</h2>
+  <div class="aviso-matematica">
+    📐 <strong>Matemática aplicada:</strong> Já desconta o que se perde na cozinha. Os valores abaixo são o que você COMPRAR no mercado!
+  </div>
   <div class="topo">
     <span class="destaque" id="totalMarmitas">Total: 0 marmitas</span>
     <button class="botao-copiar" onclick="copiarLista()">📋 Copiar Lista</button>
@@ -122,7 +135,7 @@
 const SENHA_CORRETA = "SIESTA";
 
 function verificarSenha() {
-  const senha = document.getElementById('senha').value;
+  const senha = document.getElementById('senha').value.replace(/\s/g, '');
   if (senha === SENHA_CORRETA) {
     document.getElementById('telaSenha').classList.add('escondido');
     document.getElementById('telaPrincipal').classList.remove('escondido');
@@ -135,37 +148,86 @@ function verificarSenha() {
 }
 
 // ==============================================
-// 📋 INGREDIENTES DA COZINHA BRASILEIRA
+// 📐 TABELA DE CONVERSÃO — Quanto se perde na cozinha
 // ==============================================
-const INGREDIENTES = {
-  v: {
-    nome: "🔴 Saúde / Leve",
-    itens: "Peixe branco, frango, mandioquinha, cenoura, chuchu, abobrinha, abóbora, arroz, batata, ervas, azeite"
+const FATORES = {
+  frango: 0.75, carne: 0.75, peixe: 0.80, arroz: 3.0, feijao: 2.5, legume: 0.85,
+  batata: 0.85, ovo: 1.0, macarrao: 3.0, mandioca: 0.85
+};
+
+function calcularCompra(pesoCozido, tipo) {
+  const fator = FATORES[tipo] || 0.85;
+  const cru = pesoCozido / fator;
+  if (cru >= 1000) return (cru / 1000).toFixed(2).replace('.', ',') + ' kg';
+  return Math.round(cru) + ' g';
+}
+
+// ==============================================
+// 🍽️ CARDÁPIO COMPLETO — 7 DIAS SEM REPETIR POR PERFIL
+// ==============================================
+const CARDAPIO = {
+  v: { nome: "🔴 Saúde / Leve", porcao: { frango: 130, peixe: 130, arroz: 120, legume: 180 },
+    pratos: [
+      {p:"Peixe branco ao molho de ervas",c:"Arroz bem cozido",l:"Cenoura + abobrinha no vapor"},
+      {p:"Peito de frango cozido sem pele",c:"Arroz de couve-flor",l:"Chuchu + mandioca cozida"},
+      {p:"Carne moída magra refogada",c:"Arroz branco",l:"Abóbora + cenoura"},
+      {p:"Omelete de claras assado",c:"Batata cozida",l:"Couve-flor + vagem"},
+      {p:"Filé de frango grelhado",c:"Arroz",l:"Brócolis + cenoura"},
+      {p:"Peixe ensopado leve",c:"Batata",l:"Abobrinha + tomate sem pele"},
+      {p:"Frango desfiado suave",c:"Arroz",l:"Legumes cozidos bem macios"}
+    ]
   },
-  vd: {
-    nome: "🟢 Fit / Dieta",
-    itens: "Peito de frango, batata-doce, arroz integral, feijão preto, brócolis, vagem, ovo, frutas"
+  vd: { nome: "🟢 Fit / Dieta", porcao: { frango: 150, carne: 150, peixe: 150, arroz: 100, feijao: 80, legume: 180 },
+    pratos: [
+      {p:"Peito de frango grelhado",c:"Batata-doce assada",l:"Brócolis refogado"},
+      {p:"Carne bovina magra grelhada",c:"Arroz integral",l:"Vagem + cenoura ralada"},
+      {p:"Filé de tilápia grelhado",c:"Mandioca cozida",l:"Mix de folhas + tomate"},
+      {p:"Frango com páprica sem gordura",c:"Arroz integral + feijão preto",l:"Couve refogada"},
+      {p:"Hambúrguer caseiro de frango",c:"Batata-doce",l:"Salada verde variada"},
+      {p:"Peixe grelhado com limão",c:"Arroz com ervilha",l:"Pepino + pimentão"},
+      {p:"Ovos mexidos com claras",c:"Batata inglesa",l:"Espinafre + tomate"}
+    ]
   },
-  a: {
-    nome: "🟡 Comida Caseira",
-    itens: "Carne bovina, arroz branco, feijão carioca, farinha, farofa, cenoura, beterraba, alface, tomate, cebola, alho, óleo, sal, cheiro-verde"
+  a: { nome: "🟡 Comida Caseira", porcao: { carne: 120, frango: 120, arroz: 150, feijao: 100, legume: 120 },
+    pratos: [
+      {p:"Bife de alcatra acebolado",c:"Arroz branco + feijão carioca",l:"Salada de alface, tomate e cebola"},
+      {p:"Sobrecoxa de frango assada",c:"Arroz + feijão",l:"Cenoura e beterraba cozidas"},
+      {p:"Carne guisada com legumes",c:"Arroz + feijão",l:"Farofa + salada de repolho"},
+      {p:"Frango refogado com quiabo",c:"Arroz + feijão",l:"Couve refogada + farinha"},
+      {p:"Peixe frito ou ensopado",c:"Arroz + pirão",l:"Salada de pimentão e tomate"},
+      {p:"Polpeta de carne ao molho",c:"Arroz + feijão",l:"Salada verde"},
+      {p:"Frango à caçadora",c:"Arroz + feijão tropeiro",l:"Legumes refogados"}
+    ]
   },
-  r: {
-    nome: "🟣 Prato Rápido",
-    itens: "Carne seca, mandioca, frango desfiado, milho verde, arroz, queijo, tomate, cebola"
+  r: { nome: "🟣 Prato Rápido", porcao: { carne: 120, frango: 120, arroz: 150, legume: 120 },
+    pratos: [
+      {p:"Escondidinho de carne seca",c:"Purê de mandioca",l:"Salada de tomate e cebola"},
+      {p:"Galinhada com legumes",c:"Arroz com frango desfiado",l:"Milho + ervilha"},
+      {p:"Strogonoff de frango",c:"Arroz branco",l:"Batata palha ou legumes cozidos"},
+      {p:"Carne de sol com mandioca",c:"Arroz",l:"Vinagrete simples"},
+      {p:"Frango desfiado com molho",c:"Arroz + feijão",l:"Abobrinha refogada"},
+      {p:"Baião de dois",c:"Arroz misturado com feijão",l:"Queijo + tomate"},
+      {p:"Lombo de porco assado",c:"Arroz + batata",l:"Legumes no vapor"}
+    ]
   },
-  l: {
-    nome: "🟠 Sabor / Especial",
-    itens: "Carne moída, macarrão, molho de tomate, queijo, creme de leite, batata, cenoura, cebola, alho, tempero, óleo"
+  l: { nome: "🟠 Sabor / Especial", porcao: { carne: 120, frango: 120, macarrao: 150, legume: 120 },
+    pratos: [
+      {p:"Carne moída ao molho bolonhesa",c:"Macarrão",l:"Queijo ralado + salada"},
+      {p:"Frango à parmegiana",c:"Arroz branco",l:"Batata frita ou assada + salada"},
+      {p:"Lasanha de carne",c:"Massa com molho e queijo",l:"Salada verde"},
+      {p:"Carne assada com molho",c:"Arroz + batata corada",l:"Cenoura e vagem"},
+      {p:"Frango com creme de leite e milho",c:"Arroz branco",l:"Salada de alface e tomate"},
+      {p:"Picadinho de carne com legumes",c:"Arroz + polenta",l:"Farofa temperada"},
+      {p:"Estrogonofe de carne",c:"Arroz branco",l:"Batata palha + salada"}
+    ]
   }
 };
+
+const DIAS = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
 
 let pedidos = [];
 let corEscolhida = null;
 
-// ==============================================
-// ESCOLHER COR
-// ==============================================
 function escolherCor(cor) {
   document.querySelectorAll('.cor').forEach(b => b.classList.remove('selecionada'));
   document.getElementById('c' + cor).classList.add('selecionada');
@@ -173,20 +235,27 @@ function escolherCor(cor) {
 }
 
 // ==============================================
-// SALVAR PEDIDO
+// SALVAR PEDIDO com prato variado por dia
 // ==============================================
 function salvarPedido() {
   const nome = document.getElementById('nome').value.trim();
+  const dia = parseInt(document.getElementById('diaSemana').value);
   const qtd = parseInt(document.getElementById('quantas').value) || 1;
   const obs = document.getElementById('obs').value.trim() || "";
 
   if (!nome) { alert("⚠️ Digite o nome do cliente!"); return; }
   if (!corEscolhida) { alert("⚠️ Escolha uma cor primeiro!"); return; }
 
+  const cardapio = CARDAPIO[corEscolhida];
+  const prato = cardapio.pratos[dia - 1];
+
   pedidos.unshift({
     id: Date.now(),
     nome: nome,
     cor: corEscolhida,
+    dia: dia,
+    nomeDia: DIAS[dia - 1],
+    prato: prato,
     quantidade: qtd,
     observacao: obs,
     pronto: false
@@ -195,11 +264,11 @@ function salvarPedido() {
   salvarDados();
   limparCampos();
   montarTela();
-  alert("✅ Pedido salvo! Lista de compras já atualizada 👇");
+  alert(`✅ Pedido salvo!\n📅 ${DIAS[dia-1]}\n🍽️ ${prato.p} + ${prato.c}\n👉 Lista de compras atualizada abaixo`);
 }
 
 // ==============================================
-// 🧠 GERA LISTA DE COMPRAS SOZINHA
+// 🧠 GERA LISTA DE COMPRAS COM QUANTIDADES REAIS
 // ==============================================
 function montarListaCompras() {
   const ativos = pedidos.filter(p => !p.pronto);
@@ -207,37 +276,57 @@ function montarListaCompras() {
     return "⏳ Cadastre um pedido que a lista aparece aqui...";
   }
 
-  let texto = "🛒 LISTA DE COMPRAS — COZINHA SIMPLES\n";
-  texto += "═════════════════════════════════════════════\n\n";
-
-  let totalMarmitas = 0;
+  let totais = { frango:0, carne:0, peixe:0, arroz:0, feijao:0, legume:0, batata:0, macarrao:0, mandioca:0, ovo:0 };
   let resumoPorTipo = {};
 
   ativos.forEach(p => {
-    totalMarmitas += p.quantidade;
-    if (!resumoPorTipo[p.cor]) {
-      resumoPorTipo[p.cor] = { qtd: 0, nomes: [], obs: [] };
-    }
-    resumoPorTipo[p.cor].qtd += p.quantidade;
-    resumoPorTipo[p.cor].nomes.push(p.nome);
-    if (p.observacao) resumoPorTipo[p.cor].obs.push(`${p.nome}: ${p.observacao}`);
+    const cfg = CARDAPIO[p.cor];
+    const porcao = cfg.porcao;
+    const q = p.quantidade;
+    if (porcao.frango) totais.frango += porcao.frango * q;
+    if (porcao.carne) totais.carne += porcao.carne * q;
+    if (porcao.peixe) totais.peixe += porcao.peixe * q;
+    if (porcao.arroz) totais.arroz += porcao.arroz * q;
+    if (porcao.feijao) totais.feijao += porcao.feijao * q;
+    if (porcao.legume) totais.legume += porcao.legume * q;
+    if (porcao.batata) totais.batata += porcao.batata * q;
+    if (porcao.macarrao) totais.macarrao += porcao.macarrao * q;
+    if (porcao.mandioca) totais.mandioca += porcao.mandioca * q;
+    if (porcao.ovo) totais.ovo += porcao.ovo * q;
+
+    if (!resumoPorTipo[p.dia]) resumoPorTipo[p.dia] = { dia:p.nomeDia, itens:[] };
+    resumoPorTipo[p.dia].itens.push(`${p.nome} (${CARDAPIO[p.cor].nome}): ${p.prato.p}`);
   });
 
-  for (let cor in resumoPorTipo) {
-    const tipo = INGREDIENTES[cor];
-    const info = resumoPorTipo[cor];
-    texto += `${tipo.nome} — ${info.qtd} marmita${info.qtd>1?'s':''}\n`;
-    texto += `   👤 ${info.nomes.join(', ')}\n`;
-    texto += `   📦 ${tipo.itens}\n`;
-    if (info.obs.length > 0) {
-      info.obs.forEach(a => { texto += `   ⚠️ ${a}\n`; });
-    }
-    texto += "\n";
-  }
+  let texto = "🛒 LISTA DE COMPRAS — COZINHA SIMPLES\n";
+  texto += "═════════════════════════════════════════════════\n\n";
+  texto += "📐 QUANTIDADES PARA COMPRAR NO MERCADO:\n";
+  texto += "──────────────────────────────────────────────────\n";
 
-  texto += "═════════════════════════════════════════════\n";
+  if (totais.frango > 0) texto += "🍗 Frango:      " + calcularCompra(totais.frango, 'frango') + "\n";
+  if (totais.carne > 0)  texto += "🥩 Carne:       " + calcularCompra(totais.carne, 'carne') + "\n";
+  if (totais.peixe > 0)  texto += "🐟 Peixe:       " + calcularCompra(totais.peixe, 'peixe') + "\n";
+  if (totais.arroz > 0)  texto += "🍚 Arroz:       " + calcularCompra(totais.arroz, 'arroz') + "\n";
+  if (totais.feijao > 0) texto += "🫘 Feijão:      " + calcularCompra(totais.feijao, 'feijao') + "\n";
+  if (totais.legume > 0) texto += "🥦 Legumes:     " + calcularCompra(totais.legume, 'legume') + "\n";
+  if (totais.batata > 0) texto += "🥔 Batata:      " + calcularCompra(totais.batata, 'batata') + "\n";
+  if (totais.mandioca >0)texto += "🌽 Mandioca:    " + calcularCompra(totais.mandioca, 'mandioca') + "\n";
+  if (totais.macarrao >0)texto += "🍝 Macarrão:    " + calcularCompra(totais.macarrao, 'macarrao') + "\n";
+  if (totais.ovo > 0)    texto += "🥚 Ovos:        " + Math.ceil(totais.ovo / 50) + " unidades\n";
+
+  texto += "\n📅 CARDÁPIO POR DIA:\n";
+  texto += "──────────────────────────────────────────────────\n";
+  Object.keys(resumoPorTipo).sort((a,b)=>a-b).forEach(d => {
+    const g = resumoPorTipo[d];
+    texto += `📅 ${g.dia}:\n`;
+    g.itens.forEach(i => { texto += `   ✅ ${i}\n`; });
+  });
+
+  const totalMarmitas = ativos.reduce((s,p)=>s+p.quantidade,0);
+  texto += "\n═════════════════════════════════════════════════\n";
   texto += `✅ TOTAL: ${totalMarmitas} marmitas\n`;
-  texto += "👉 Lista pronta! Copie e envie ao fornecedor.";
+  texto += "💡 As quantidades acima JÁ descontam o que se perde na cozinha!\n";
+  texto += "👉 É só comprar assim!";
 
   return texto;
 }
@@ -246,12 +335,9 @@ function montarListaCompras() {
 // MOSTRAR TUDO NA TELA
 // ==============================================
 function montarTela() {
-  const listaTexto = montarListaCompras();
-  document.getElementById('listaCompras').textContent = listaTexto;
-
-  const totalAtivos = pedidos.filter(p => !p.pronto).reduce((s, p) => s + p.quantidade, 0);
+  document.getElementById('listaCompras').textContent = montarListaCompras();
+  const totalAtivos = pedidos.filter(p => !p.pronto).reduce((s,p)=>s+p.quantidade,0);
   document.getElementById('totalMarmitas').textContent = `Total: ${totalAtivos} marmitas`;
-
   mostrarPedidos();
 }
 
@@ -262,9 +348,14 @@ function mostrarPedidos() {
     const div = document.createElement('div');
     div.className = `pedido ${p.cor} ${p.pronto ? 'pronto' : ''}`;
     div.innerHTML = `
-      <div class="nome">${p.nome}</div>
-      <span class="tipo ${p.cor}">${INGREDIENTES[p.cor].nome}</span>
+      <div class="nome">${p.nome} — ${p.nomeDia}</div>
+      <span class="tipo ${p.cor}">${CARDAPIO[p.cor].nome}</span>
       <div>🍽️ ${p.quantidade} marmita${p.quantidade>1?'s':''}</div>
+      <div style="font-size:0.9rem; margin-top:4px; color:#374151;">
+        🍖 ${p.prato.p}<br>
+        🍚 ${p.prato.c}<br>
+        🥦 ${p.prato.l}
+      </div>
       ${p.observacao ? `<div class="obs">⚠️ ${p.observacao}</div>` : ""}
       <div class="linha">
         <button class="btn-pronto" onclick="marcarPronto(${p.id})">${p.pronto?'↩️ Refazer':'✅ Pronto'}</button>
@@ -276,60 +367,31 @@ function mostrarPedidos() {
   document.getElementById('contador').textContent = pedidos.length;
 }
 
-// ==============================================
-// AÇÕES
-// ==============================================
 function marcarPronto(id) {
   const p = pedidos.find(x => x.id === id);
-  if (p) {
-    p.pronto = !p.pronto;
-    salvarDados();
-    montarTela();
-  }
+  if (p) { p.pronto = !p.pronto; salvarDados(); montarTela(); }
 }
-
 function apagar(id) {
   if (!confirm("Tem certeza?")) return;
-  pedidos = pedidos.filter(x => x.id !== id);
-  salvarDados();
-  montarTela();
+  pedidos = pedidos.filter(x => x.id !== id); salvarDados(); montarTela();
 }
-
 function copiarLista() {
-  const texto = document.getElementById('listaCompras').textContent;
-  navigator.clipboard.writeText(texto).then(() => alert("✅ Lista copiada! Vá no WhatsApp e cole."));
+  navigator.clipboard.writeText(document.getElementById('listaCompras').textContent)
+    .then(() => alert("✅ Lista copiada! Vá no WhatsApp e cole."));
 }
-
 function enviarWhats() {
-  const texto = encodeURIComponent(document.getElementById('listaCompras').textContent);
-  window.open(`https://wa.me/?text=${texto}`, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('listaCompras').textContent)}`, '_blank');
 }
-
-// ==============================================
-// SALVAR E CARREGAR
-// ==============================================
-function salvarDados() {
-  localStorage.setItem('cozinhaSimples', JSON.stringify(pedidos));
-}
-
-function carregarDados() {
-  const salvo = localStorage.getItem('cozinhaSimples');
-  if (salvo) pedidos = JSON.parse(salvo);
-}
-
+function salvarDados() { localStorage.setItem('cozinhaSimplesV2', JSON.stringify(pedidos)); }
+function carregarDados() { const s=localStorage.getItem('cozinhaSimplesV2'); if(s) pedidos=JSON.parse(s); }
 function limparCampos() {
-  document.getElementById('nome').value = "";
-  document.getElementById('quantas').value = "1";
-  document.getElementById('obs').value = "";
-  document.querySelectorAll('.cor').forEach(b => b.classList.remove('selecionada'));
-  corEscolhida = null;
+  document.getElementById('nome').value=""; document.getElementById('quantas').value="1";
+  document.getElementById('obs').value=""; document.querySelectorAll('.cor').forEach(b=>b.classList.remove('selecionada'));
+  corEscolhida=null;
 }
-
 function limparTudo() {
-  if (!confirm("Apagar TODOS os pedidos?")) return;
-  pedidos = [];
-  localStorage.removeItem('cozinhaSimples');
-  montarTela();
+  if(!confirm("Apagar TODOS os pedidos?")) return;
+  pedidos=[]; localStorage.removeItem('cozinhaSimplesV2'); montarTela();
 }
 </script>
 </body>
