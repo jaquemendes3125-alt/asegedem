@@ -3,271 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASEGEDEM</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>🍳 Cozinha Simples — Controle de Marmitas</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+    body { background: #f0f4f8; padding: 10px; font-size: 16px; }
 
-    .tela-apresentacao {
-      position:fixed; inset:0;
-      background:linear-gradient(135deg, #1e293b, #0f172a);
-      display:flex; align-items:center; justify-content:center;
-      z-index:100; transition:opacity .5s ease;
-    }
-    .tela-apresentacao.oculta { opacity:0; pointer-events:none; }
-    .caixa {
-      background:#fff; padding:50px 30px; border-radius:24px;
-      max-width:450px; width:90%; text-align:center;
-      box-shadow:0 20px 60px rgba(0,0,0,.3);
-    }
-    .nome { font-size:2.2rem; font-weight:bold; color:#10b981; margin:15px 0; }
-    .aviso { margin-top:25px; padding:12px; background:#f1f5f9; border-radius:10px; font-size:.9rem; color:#475569; }
-    .botao-entrar { display:inline-block; margin-top:15px; padding:12px 30px; background:#10b981; color:#fff; border-radius:10px; text-decoration:none; font-weight:bold; }
-    .botao-entrar:hover { background:#059669; }
+    .cabecalho { background: #1e293b; color: white; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
+    .aviso { background: #fef3c7; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; }
 
-    .conteudo { display:none; padding:16px; max-width:700px; margin:0 auto; }
-    .conteudo.mostrar { display:block; }
+    h2 { font-size: 1.1rem; margin: 20px 0 10px; color: #334155; }
 
-    header { background:#1e293b; color:#fff; padding:20px; border-radius:16px; text-align:center; margin-bottom:20px; }
-    h2 { font-size:1rem; margin:20px 0 10px; }
-    .status-sync { font-size:.8rem; margin-bottom:10px; color:#475569; }
+    /* Botoes de Cor */
+    .cores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 15px; }
+    .cor { padding: 10px 5px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
+    .v { background: #fee2e2; color: #b91c1c; border: 3px solid #ef4444; }
+    .vd { background: #dcfce7; color: #166534; border: 3px solid #22c55e; }
+    .a { background: #fef9c3; color: #854d0e; border: 3px solid #eab308; }
+    .r { background: #f3e8ff; color: #6b21a8; border: 3px solid #a855f7; }
+    .l { background: #ffedd5; color: #c2410c; border: 3px solid #f97316; }
+    .selecionada { transform: scale(1.05); box-shadow: 0 0 8px rgba(0,0,0,0.25); }
 
-    .perfis { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:15px; }
-    .btn-perfil { padding:10px 4px; border:3px solid transparent; border-radius:10px; font-weight:bold; font-size:.75rem; cursor:pointer; }
-    .saude { background:#fef2f2; color:#b91c1c; border-color:#ef4444; }
-    .fit { background:#f0fdf4; color:#15803d; border-color:#10b981; }
-    .caseiro { background:#fffbeb; color:#b45309; border-color:#f59e0b; }
-    .rapido { background:#faf5ff; color:#6b21a8; border-color:#8b5cf6; }
-    .gourmet { background:#fff7ed; color:#c2410c; border-color:#f97316; }
-    .selecionado { transform:scale(1.05); box-shadow:0 0 6px rgba(0,0,0,.2); }
+    /* Formulario */
+    .caixa { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    input, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; }
+    .botao-salvar { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+    .botao-salvar:hover { background: #059669; }
+    .botao-limpar { width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 5px; cursor: pointer; }
 
-    .caixa-form { background:#fff; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,.05); }
-    input, textarea { width:100%; padding:10px; border:2px solid #e2e8f0; border-radius:8px; margin-bottom:8px; font-size:1rem; }
-    button { padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:.95rem; }
-    .btn-azul { width:100%; background:#1e293b; color:#fff; margin-top:5px; }
-    .btn-whats { width:100%; background:#25d366; color:#fff; margin-top:10px; }
+    /* Lista de Pedidos */
+    .pedido { background: white; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 5px solid #ccc; }
+    .pedido.v { border-left-color: #ef4444; }
+    .pedido.vd { border-left-color: #22c55e; }
+    .pedido.a { border-left-color: #eab308; }
+    .pedido.r { border-left-color: #a855f7; }
+    .pedido.l { border-left-color: #f97316; }
 
-    .pedido { background:#fff; border-radius:10px; padding:12px; margin:8px 0; border-left:5px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,.05); }
-    .pedido.saude { border-left-color:#ef4444; }
-    .pedido.fit { border-left-color:#10b981; }
-    .pedido.caseiro { border-left-color:#f59e0b; }
-    .pedido.rapido { border-left-color:#8b5cf6; }
-    .pedido.gourmet { border-left-color:#f97316; }
-    .pedido-nome { font-weight:bold; font-size:1rem; }
-    .etiqueta { display:inline-block; font-size:.75rem; font-weight:bold; padding:2px 8px; border-radius:10px; color:#fff; margin:4px 0; }
-    .restricao { font-size:.85rem; color:#b91c1c; background:#fef2f2; padding:4px 8px; border-radius:6px; display:inline-block; margin:4px 0; }
-    .botoes { display:flex; gap:8px; margin-top:8px; }
-    .btn-concluir { flex:1; background:#dcfce7; color:#166534; }
-    .btn-excluir { flex:1; background:#fee2e2; color:#b91c1c; }
+    .nome { font-weight: bold; font-size: 1.05rem; margin-bottom: 4px; }
+    .tipo { display: inline-block; font-size: 0.8rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; color: white; margin: 4px 0; }
+    .obs { font-size: 0.9rem; color: #b91c1c; background: #fef2f2; padding: 4px 8px; border-radius: 6px; margin-top: 4px; }
 
-    .lista-compra { background:#eff6ff; padding:12px; border-radius:10px; border:2px dashed #93c5fd; white-space:pre-wrap; font-size:.9rem; line-height:1.5; margin-bottom:10px; }
-    .topo-lista { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-    .btn-copiar { background:#dbeafe; color:#1d4ed8; font-size:.85rem; padding:4px 10px; border:none; border-radius:6px; cursor:pointer; }
+    .linha { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-pronto { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #dcfce7; color: #166534; font-weight: bold; cursor: pointer; }
+    .btn-apagar { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #fee2e2; color: #b91c1c; font-weight: bold; cursor: pointer; }
+
+    /* Lista de Compras */
+    .lista { background: #eff6ff; padding: 12px; border-radius: 8px; white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; }
+    .topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .botao-copiar { padding: 5px 12px; background: #dbeafe; color: #1d4ed8; border: none; border-radius: 6px; cursor: pointer; }
+    .botao-whats { width: 100%; padding: 10px; background: #25d366; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; font-size: 1rem; }
+    .pronto { opacity: 0.6; text-decoration: line-through; }
   </style>
 </head>
 <body>
 
-  <!-- TELA DE APRESENTAÇÃO -->
-  <div class="tela-apresentacao" id="telaApresentacao">
-    <div class="caixa">
-      <h1>COZINHA MULTIPERFIL</h1>
-      <div class="nome">ASEGEDEM</div>
-      <p class="aviso">Solução inteligente para organização de produção e pedidos</p>
-      <a href="#ASEGEDEM" class="botao-entrar" onclick="abrirSistema()">🔓 ENTRAR NO SISTEMA</a>
-    </div>
+  <div class="cabecalho">
+    <h1>🍳 COZINHA SIMPLES</h1>
+    <p>Controle de Marmitas — Sem Complicação</p>
   </div>
 
-  <!-- SISTEMA COMPLETO -->
-  <div class="conteudo" id="sistema">
-    <header>
-      <h1>🍳 ASEGEDEM — SISTEMA DE GESTÃO</h1>
-    </header>
-
-    <div class="status-sync" id="statusSync">🔄 Conectando ao Supabase...</div>
-
-    <h2>👤 Selecione o Perfil</h2>
-    <div class="perfis">
-      <button class="btn-perfil saude" id="p-saude" onclick="escolherPerfil('saude','Saúde')">🔴 Saúde</button>
-      <button class="btn-perfil fit" id="p-fit" onclick="escolherPerfil('fit','Fit')">🟢 Fit</button>
-      <button class="btn-perfil caseiro" id="p-caseiro" onclick="escolherPerfil('caseiro','Caseiro')">🟡 Casa</button>
-      <button class="btn-perfil rapido" id="p-rapido" onclick="escolherPerfil('rapido','Rápido')">🟣 Rápido</button>
-      <button class="btn-perfil gourmet" id="p-gourmet" onclick="escolherPerfil('gourmet','Gourmet')">🟠 Sabor</button>
-    </div>
-
-    <h2>➕ Cadastrar Pedido</h2>
-    <div class="caixa-form">
-      <input type="text" id="nome" placeholder="Nome do cliente">
-      <input type="number" id="qtd" placeholder="Quantidade de marmitas" min="1">
-      <textarea id="obs" placeholder="Observações ou restrições..." rows="2"></textarea>
-      <button class="btn-azul" onclick="cadastrar()">✅ CADASTRAR PEDIDO</button>
-    </div>
-
-    <h2>🛒 Lista de Compras</h2>
-    <div class="topo-lista">
-      <span id="totalMarmitas">Total: 0 marmitas</span>
-      <button class="btn-copiar" onclick="copiarLista()">📋 Copiar</button>
-    </div>
-    <div class="lista-compra" id="listaCompras">Nenhum pedido cadastrado.</div>
-    <button class="btn-whats" onclick="enviarWhatsApp()">📲 Enviar WhatsApp</button>
-
-    <h2>📦 Pedidos Cadastrados (<span id="contador">0</span>)</h2>
-    <div id="pedidos"></div>
+  <div class="aviso">
+    💡 <strong>Como usar:</strong> Escolha a cor → digite o nome → salve. Pronto!
   </div>
+
+  <h2>🎨 Escolha o Tipo de Cliente</h2>
+  <div class="cores">
+    <button class="cor v" id="cv" onclick="escolherCor('v','Saúde / Sem Leite')">🔴 Saúde</button>
+    <button class="cor vd" id="cvd" onclick="escolherCor('vd','Fit / Sem Gordura')">🟢 Fit</button>
+    <button class="cor a" id="ca" onclick="escolherCor('a','Comida Caseira')">🟡 Comum</button>
+    <button class="cor r" id="cr" onclick="escolherCor('r','Prático / Rápido')">🟣 Rápido</button>
+    <button class="cor l" id="cl" onclick="escolherCor('l','Sabor / Especial')">🟠 Sabor</button>
+  </div>
+
+  <h2>➕ Cadastrar Marmita</h2>
+  <div class="caixa">
+    <input type="text" id="nome" placeholder="Nome do Cliente">
+    <input type="number" id="quantas" placeholder="Quantas marmitas?" min="1" value="1">
+    <textarea id="obs" placeholder="Tem restrição? Ex: Sem leite, sem pimenta..." rows="2"></textarea>
+    <button class="botao-salvar" onclick="salvarPedido()">✅ SALVAR PEDIDO</button>
+  </div>
+
+  <h2>🛒 Lista de Compras</h2>
+  <div class="topo">
+    <span id="total">Total: 0 marmitas</span>
+    <button class="botao-copiar" onclick="copiarLista()">📋 Copiar</button>
+  </div>
+  <div class="caixa lista" id="listaCompras">Nenhum pedido salvo.</div>
+  <button class="botao-whats" onclick="enviarWhats()">📲 Mandar no WhatsApp</button>
+
+  <h2>📦 Pedidos Salvos (<span id="contador">0</span>)</h2>
+  <div id="pedidos"></div>
+
+  <button class="botao-limpar" onclick="limparTudo()">🗑️ LIMPAR TUDO</button>
 
 <script>
 // ==============================================
-// 🔑 ACESSO — LINK OU BOTÃO
+// ARMAZENA TUDO NO PRÓPRIO CELULAR
 // ==============================================
-function abrirSistema() {
-  document.getElementById('telaApresentacao').classList.add('oculta');
-  document.getElementById('sistema').classList.add('mostrar');
-  inicializarSupabase();
-}
+let pedidos = [];
+let corEscolhida = null;
+let nomeTipo = "";
 
-window.addEventListener('load', function() {
-  const hash = (window.location.hash || '').toUpperCase().trim();
-  if (hash === "#ASEGEDEM") {
-    setTimeout(abrirSistema, 300);
-  }
-});
-
-// ==============================================
-// 💾 SUPABASE — SALVA TUDO NA NUVEM
-// ==============================================
-const SUPABASE_URL = "https://ixxrzlnrstpbfnqclosq.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6we1T3JGN2HBwTpn4IITig_px6An0IC";
-const TABELA = "pedidos";
-let supabase = null;
-
-async function inicializarSupabase() {
-  try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    document.getElementById('statusSync').textContent = "✅ Conectado ao Supabase — salvando na nuvem";
-    await carregarDadosDoSupabase();
-  } catch(e) {
-    document.getElementById('statusSync').textContent = "⚠️ Usando armazenamento local";
-    carregarDadosLocal();
-  }
-}
-
-// ==============================================
-// 📂 CARREGAR DADOS — PRIMEIRO DO SUPABASE
-// ==============================================
-async function carregarDadosDoSupabase() {
-  try {
-    const { data, error } = await supabase.from(TABELA).select('*').order('id', { ascending: false });
-    if (error) throw error;
-    if (data && data.length > 0) {
-      pedidos = data;
-      montarListaPedidos();
-      montarListaCompras();
-      document.getElementById('statusSync').textContent = `✅ ${pedidos.length} pedidos carregados da nuvem`;
-    } else {
-      carregarDadosLocal();
-    }
-  } catch(e) {
-    console.log("Supabase indisponível:", e);
-    carregarDadosLocal();
-  }
-}
-
-function carregarDadosLocal() {
-  const salvo = localStorage.getItem('cozinha');
-  if (salvo) {
-    pedidos = JSON.parse(salvo);
-    montarListaPedidos();
-    montarListaCompras();
-  }
-}
-
-// ==============================================
-// 💾 SALVAR — SUPABASE + LOCAL (SEGURANÇA DUPLA)
-// ==============================================
-async function salvarDados(pedidoAtual = null) {
-  localStorage.setItem('cozinha', JSON.stringify(pedidos));
-  
-  if (supabase && pedidoAtual) {
-    try {
-      await supabase.from(TABELA).upsert([pedidoAtual]);
-      document.getElementById('statusSync').textContent = "✅ Salvo na nuvem!";
-    } catch(e) {
-      document.getElementById('statusSync').textContent = "⚠️ Salvo localmente apenas";
-    }
-  }
-}
-
-// ==============================================
-// CARDÁPIOS
-// ==============================================
-const cardapios = {
-  saude: ["Peixe grelhado + Purê de mandioquinha + Legumes no vapor","Frango cozido + Arroz de couve-flor + Mandioca","Carne moída magra + Abobrinha + Purê de batata","Sopa de abóbora com frango + Gengibre","Omelete de claras + Espinafre + Arroz"],
-  fit: ["Frango grelhado 150g + Batata-doce + Vagem","Carne moída + Arroz integral + Feijão + Brócolis","Peixe grelhado + Purê de mandioca + Salada","Carne magra + Macarrão integral + Legumes","Frango desfiado + Arroz com lentilha + Couve"],
-  caseiro: ["Bife acebolado + Arroz + Feijão + Farofa","Frango assado + Batata + Salada","Lombo + Arroz + Couve refogada","Peixe ensopado + Arroz + Pirão","Carne ao molho + Macarrão + Salada"],
-  rapido: ["Escondidinho de frango com purê","Arroz com carne e legumes","Frango desfiado com legumes","Carne moída com feijão e arroz","Macarrão com frango e molho"],
-  gourmet: ["Lasanha de carne com molho de tomate","Nhoque ao molho de queijo + Filé","Frango à parmegiana + Arroz + Batata","Strogonoff de carne + Arroz + Batata palha","Costela com purê de mandioca gratinado"]
+// Quando abrir a página, carrega o que já foi salvo
+window.onload = function() {
+  carregarDados();
+  montarTela();
 };
 
-let perfilEscolhido = null, nomePerfil = "", pedidos = [];
-
 // ==============================================
-// 👤 ESCOLHER PERFIL
+// ESCOLHER A COR
 // ==============================================
-function escolherPerfil(tipo, nome) {
-  document.querySelectorAll('.btn-perfil').forEach(b=>b.classList.remove('selecionado'));
-  document.getElementById(`p-${tipo}`).classList.add('selecionado');
-  perfilEscolhido = tipo; nomePerfil = nome;
+function escolherCor(cor, texto) {
+  document.querySelectorAll('.cor').forEach(b => b.classList.remove('selecionada'));
+  document.getElementById('c' + cor).classList.add('selecionada');
+  corEscolhida = cor;
+  nomeTipo = texto;
 }
 
 // ==============================================
-// ✅ CADASTRAR — SALVA NO SUPABASE
+// SALVAR NOVO PEDIDO
 // ==============================================
-async function cadastrar() {
+function salvarPedido() {
   const nome = document.getElementById('nome').value.trim();
-  const qtd = parseInt(document.getElementById('qtd').value) || 1;
-  const obs = document.getElementById('obs').value.trim() || "Sem restrições";
-  
-  if (!nome) { alert("Digite o nome do cliente!"); return; }
-  if (!perfilEscolhido) { alert("Escolha um perfil primeiro!"); return; }
+  const qtd = parseInt(document.getElementById('quantas').value) || 1;
+  const obs = document.getElementById('obs').value.trim() || "Nenhuma restrição";
 
-  const cardapioEscolhido = cardapios[perfilEscolhido][Math.floor(Math.random() * 5)];
-  
+  if (!nome) { alert("⚠️ Digite o nome do cliente!"); return; }
+  if (!corEscolhida) { alert("⚠️ Escolha uma cor primeiro!"); return; }
+
   const pedido = {
     id: Date.now(),
     nome: nome,
-    perfil: perfilEscolhido,
-    perfilNome: nomePerfil,
+    cor: corEscolhida,
+    tipo: nomeTipo,
     quantidade: qtd,
-    cardapio: cardapioEscolhido,
     observacao: obs,
-    concluido: false
+    pronto: false
   };
 
   pedidos.unshift(pedido);
-  await salvarDados(pedido);
+  salvarDados();
   limparCampos();
-  montarListaPedidos();
-  montarListaCompras();
-  alert("✅ Pedido cadastrado e salvo na nuvem!");
+  montarTela();
+  alert("✅ Pedido salvo!");
 }
 
 // ==============================================
-// 📋 MOSTRAR PEDIDOS
+// MOSTRAR TUDO NA TELA
 // ==============================================
-function montarListaPedidos() {
+function montarTela() {
+  mostrarPedidos();
+  mostrarListaCompras();
+}
+
+function mostrarPedidos() {
   const area = document.getElementById('pedidos');
   area.innerHTML = "";
   pedidos.forEach(p => {
     const div = document.createElement('div');
-    div.className = `pedido ${p.perfil}`;
+    div.className = `pedido ${p.cor} ${p.pronto ? 'pronto' : ''}`;
     div.innerHTML = `
-      <div class="pedido-nome">${p.nome}</div>
-      <span class="etiqueta ${p.perfil}">${p.perfilNome}</span>
+      <div class="nome">${p.nome}</div>
+      <span class="tipo ${p.cor}">${p.tipo}</span>
       <div>🍽️ ${p.quantidade} marmita${p.quantidade>1?'s':''}</div>
-      <div style="margin:4px 0;">${p.cardapio}</div>
-      ${p.observacao!=="Sem restrições"?`<div class="restricao">⚠️ ${p.observacao}</div>`:""}
-      <div class="botoes">
-        <button class="btn-concluir" onclick="concluir(${p.id})">${p.concluido?'↩️ Refazer':'✅ Concluído'}</button>
-        <button class="btn-excluir" onclick="excluir(${p.id})">🗑️ Excluir</button>
+      ${p.observacao !== "Nenhuma restrição" ? `<div class="obs">⚠️ ${p.observacao}</div>` : ""}
+      <div class="linha">
+        <button class="btn-pronto" onclick="marcarPronto(${p.id})">${p.pronto?'↩️ Refazer':'✅ Pronto'}</button>
+        <button class="btn-apagar" onclick="apagar(${p.id})">🗑️ Apagar</button>
       </div>
     `;
     area.appendChild(div);
@@ -275,75 +176,96 @@ function montarListaPedidos() {
   document.getElementById('contador').textContent = pedidos.length;
 }
 
-// ==============================================
-// 🛒 LISTA DE COMPRAS
-// ==============================================
-function montarListaCompras() {
-  const ativos = pedidos.filter(p => !p.concluido);
+function mostrarListaCompras() {
+  const ativos = pedidos.filter(p => !p.pronto);
   if (ativos.length === 0) {
     document.getElementById('listaCompras').textContent = "Nenhum pedido ativo.";
-    document.getElementById('totalMarmitas').textContent = "Total: 0 marmitas";
+    document.getElementById('total').textContent = "Total: 0 marmitas";
     return;
   }
-  let texto = "📦 LISTA DE COMPRAS — ASEGEDEM\n═════════════════════════════\n\n", total = 0;
+
+  let texto = "📦 LISTA DE COMPRAS\n═════════════════════════════\n\n";
+  let total = 0;
   ativos.forEach(p => {
     total += p.quantidade;
-    texto += `🔹 ${p.nome} — ${p.quantidade}x ${p.perfilNome}\n   ${p.cardapio}\n`;
-    if (p.observacao !== "Sem restrições") texto += `   ⚠️ ${p.observacao}\n`;
+    texto += `🔹 ${p.nome} — ${p.quantidade}x ${p.tipo}\n`;
+    if (p.observacao !== "Nenhuma restrição") {
+      texto += `   ⚠️ ${p.observacao}\n`;
+    }
     texto += "\n";
   });
   texto += "═════════════════════════════\n✅ TOTAL: " + total + " marmitas";
+
   document.getElementById('listaCompras').textContent = texto;
-  document.getElementById('totalMarmitas').textContent = `Total: ${total} marmitas`;
+  document.getElementById('total').textContent = `Total: ${total} marmitas`;
 }
 
 // ==============================================
-// ✅ CONCLUIR / EXCLUIR — ATUALIZA NO SUPABASE
+// MARCAR COMO PRONTO OU APAGAR
 // ==============================================
-async function concluir(id) {
+function marcarPronto(id) {
   const p = pedidos.find(x => x.id === id);
   if (p) {
-    p.concluido = !p.concluido;
-    await salvarDados(p);
-    montarListaPedidos();
-    montarListaCompras();
+    p.pronto = !p.pronto;
+    salvarDados();
+    montarTela();
   }
 }
-async function excluir(id) {
-  if (!confirm("Tem certeza que deseja excluir?")) return;
+
+function apagar(id) {
+  if (!confirm("Tem certeza que quer apagar?")) return;
   pedidos = pedidos.filter(x => x.id !== id);
-  localStorage.setItem('cozinha', JSON.stringify(pedidos));
-  if (supabase) {
-    try {
-      await supabase.from(TABELA).delete().eq('id', id);
-    } catch(e) { console.log("Erro ao excluir no Supabase"); }
-  }
-  montarListaPedidos();
-  montarListaCompras();
+  salvarDados();
+  montarTela();
 }
 
 // ==============================================
-// 📋 COPIAR E WHATSAPP
+// COPIAR E MANDAR NO WHATSAPP
 // ==============================================
 function copiarLista() {
   const texto = document.getElementById('listaCompras').textContent;
   navigator.clipboard.writeText(texto).then(() => alert("✅ Lista copiada!"));
 }
-function enviarWhatsApp() {
+
+function enviarWhats() {
   const texto = encodeURIComponent(document.getElementById('listaCompras').textContent);
   window.open(`https://wa.me/?text=${texto}`, '_blank');
 }
 
 // ==============================================
-// 🧹 LIMPAR CAMPOS
+// SALVAR E CARREGAR DO CELULAR
+// ==============================================
+function salvarDados() {
+  localStorage.setItem('cozinhaSimples', JSON.stringify(pedidos));
+}
+
+function carregarDados() {
+  const salvo = localStorage.getItem('cozinhaSimples');
+  if (salvo) {
+    pedidos = JSON.parse(salvo);
+  }
+}
+
+// ==============================================
+// LIMPAR TUDO
+// ==============================================
+function limparTudo() {
+  if (!confirm("Tem certeza? Vai apagar TODOS os pedidos!")) return;
+  pedidos = [];
+  localStorage.removeItem('cozinhaSimples');
+  montarTela();
+}
+
+// ==============================================
+// LIMPAR CAMPOS DEPOIS DE SALVAR
 // ==============================================
 function limparCampos() {
   document.getElementById('nome').value = "";
-  document.getElementById('qtd').value = "";
+  document.getElementById('quantas').value = "1";
   document.getElementById('obs').value = "";
-  document.querySelectorAll('.btn-perfil').forEach(b => b.classList.remove('selecionado'));
-  perfilEscolhido = null;
-  nomePerfil = "";
+  document.querySelectorAll('.cor').forEach(b => b.classList.remove('selecionada'));
+  corEscolhida = null;
+  nomeTipo = "";
 }
 </script>
 </body>
